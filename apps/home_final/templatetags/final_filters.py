@@ -108,3 +108,20 @@ def multi_sort(queryset, fields):
 def getattr(obj, attr_name):
     """Template filter to dynamically get object attribute."""
     return getattr(obj, attr_name, "")
+
+
+@register.filter
+def clean_nan(value):
+    """
+    Cleans any field that contains nan, NaN, NAN, None, null, or empty spaces.
+    Returns an empty string for display.
+    """
+    if value is None:
+        return ""
+
+    v = str(value).strip().lower()
+
+    if v in ["nan", "none", "null", ""]:
+        return ""
+
+    return value

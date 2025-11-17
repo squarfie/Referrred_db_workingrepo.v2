@@ -145,26 +145,6 @@ def upload_wgs_view(request):
     )
 
 
-# @login_required
-# def show_wgs_projects(request):
-#     wgs_projects = WGS_Project.objects.all().order_by("id")  # optional ordering
-
-#     total_records = WGS_Project.objects.count()
-#      # Paginate the queryset to display 20 records per page
-#     paginator = Paginator(wgs_projects, 20)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-
-#     # Render the template with paginated data
-#     return render(
-#         request,
-#         "wgs_app/show_wgs_proj.html",
-#         {"page_obj": page_obj,
-#          "total_records": total_records,
-#          },  # only send page_obj
-#     )
-
-
 @login_required
 def show_wgs_projects(request):
     # Get all Referred_Data that have associated WGS projects
@@ -373,24 +353,6 @@ def upload_fastq(request):
     })
 
 
-# @login_required
-# def show_fastq(request):
-#     fastq_summaries = FastqSummary.objects.all().order_by("id")  # optional ordering
-
-#     total_records = FastqSummary.objects.count()
-#      # Paginate the queryset to display 20 records per page
-#     paginator = Paginator(fastq_summaries, 20)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-
-#     # Render the template with paginated data
-#     return render(
-#         request,
-#         "wgs_app/show_fastq.html",
-#         {"page_obj": page_obj,
-#          "total_records": total_records,
-#          },  # only send page_obj
-#     )
 
 @login_required
 def show_fastq(request):
@@ -416,18 +378,6 @@ def show_fastq(request):
 
 
 
-# @login_required
-# def delete_fastq(request, pk):
-#     fastq_item = get_object_or_404(FastqSummary, pk=pk)
-
-#     if request.method == "POST":
-#         fastq_item.delete()
-#         messages.success(request, f"Record {fastq_item.sample} deleted successfully!")
-#         return redirect('show_fastq')  # <-- Correct URL name
-
-#     messages.error(request, "Invalid request for deletion.")
-#     return redirect('show_fastq')  # <-- Correct URL name
-
 
 @login_required
 def delete_fastq(request, pk):
@@ -448,11 +398,6 @@ def delete_fastq(request, pk):
     return redirect('show_fastq')
 
 
-
-# def delete_all_fastq(request):
-#     FastqSummary.objects.all().delete()
-#     messages.success(request, "FastQ Records have been deleted successfully.")
-#     return redirect('show_fastq')  # Redirect to the table view
 
 
 @login_required
@@ -1709,21 +1654,6 @@ def upload_amrfinder(request):
     })
 
 
-# @login_required
-# def show_amrfinder(request):
-#     records = Amrfinderplus.objects.all().order_by('-Date_uploaded_am')
-#     upload_dates = (
-#         Amrfinderplus.objects.exclude(Date_uploaded_am__isnull=True)
-#         .values_list('Date_uploaded_am', flat=True)
-#         .distinct()
-#         .order_by('-Date_uploaded_am')
-#     )
-
-#     return render(request, "wgs_app/show_amrfinder.html", {
-#         "records": records,
-#         "upload_dates": upload_dates,
-#     })
-
 
 
 @login_required
@@ -1751,18 +1681,6 @@ def show_amrfinder(request):
 
 
 
-# @login_required
-# def delete_amrfinder(request, pk):
-#     amrfinder_item = get_object_or_404(Amrfinderplus, pk=pk)
-
-#     if request.method == "POST":
-#         amrfinder_item.delete()
-#         messages.success(request, f"Record {amrfinder_item.name} deleted successfully!")
-#         return redirect('show_amrfinder')  # <-- Correct URL name
-
-#     messages.error(request, "Invalid request for deletion.")
-#     return redirect('show_amrfinder')  # <-- Correct URL name
-
 
 
 @login_required
@@ -1784,11 +1702,6 @@ def delete_amrfinder(request, pk):
     return redirect('show_amrfinder')
 
 
-# @login_required
-# def delete_all_amrfinder(request):
-#     Amrfinderplus.objects.all().delete()
-#     messages.success(request, "AmrfinderPlus Records have been deleted successfully.")
-#     return redirect('show_amrfinder')  # Redirect to the table view
 
 
 
@@ -2072,40 +1985,45 @@ def view_wgs_overview(request):
 
 @login_required
 def get_wgs_details(request, accession):
-    """
-    Returns detailed info for one accession.
-    Used for AJAX lazy loading.
-    """
     print(f"\n=== FETCHING DETAILS FOR ACCESSION: {accession} ===")
-    
-    # Fetch the referred data
+
+    # Fetch the referred isolate
     referred = Final_Data.objects.filter(f_AccessionNo=accession).first()
     if not referred:
-        print(f" Accession {accession} not found in Final_Data")
         return JsonResponse({"error": "Accession not found."}, status=404)
 
-    print(f" Found referred record: {referred}")
-    print(f"   - Patient: {referred.f_First_Name} {referred.f_Last_Name}")
-    print(f"   - Age: {referred.f_Age}, Sex: {referred.f_Sex}")
-    print(f"   - Specimen: {referred.f_Spec_Type}")
-
-    # Fetch antibiotic entries - use values_dict for clarity
+    # ============================================================
+    # ✔ FIX: Convert antibiotic entries to SAFE dictionary format
+    # ============================================================
     antibiotics_qs = Final_AntibioticEntry.objects.filter(
         ab_idNum_f_referred__f_AccessionNo=accession
+    ).only(
+        "ab_Abx_code",
+        "ab_Disk_value", "ab_Disk_enRIS",
+        "ab_MIC_value", "ab_MIC_enRIS",
+        "ab_MIC_operand",
     )
-    
+
     antibiotics = []
     for ab in antibiotics_qs:
         antibiotics.append({
-            "ab_Abx_code": ab.ab_Abx_code,
-            "ab_MIC_RIS": ab.ab_MIC_RIS or "",
-            "ab_MIC_value": ab.ab_MIC_value or "",
-            "ab_Disk_value": ab.ab_Disk_value or "",
-        })
-    
-    print(f" Found {len(antibiotics)} antibiotic entries")
+            "code": ab.ab_Abx_code,
 
-    # Fetch related WGS projects
+            # Disk
+            "disk": ab.ab_Disk_value or "",
+            "d_ris": ab.ab_Disk_enRIS or "",
+
+            # MIC
+            "mic": ab.ab_MIC_value or "",
+            "m_ris": ab.ab_MIC_enRIS or "",
+            "m_op": ab.ab_MIC_operand or "",
+        })
+
+    print(f" Found {len(antibiotics)} antibiotic entries (SAFE FORMAT)")
+
+    # ============================================================
+    # WGS Related Data
+    # ============================================================
     projects = WGS_Project.objects.filter(
         Q(WGS_FastQ_Acc=accession)
         | Q(WGS_Mlst_Acc=accession)
@@ -2115,9 +2033,6 @@ def get_wgs_details(request, accession):
         | Q(WGS_Amrfinder_Acc=accession)
     ).distinct()
 
-    print(f" Found {projects.count()} WGS projects")
-
-    # Collect all related data
     related_data = {
         "fastq": list(FastqSummary.objects.filter(
             Q(fastq_project__in=projects) | Q(sample=accession)
@@ -2139,14 +2054,9 @@ def get_wgs_details(request, accession):
         )),
     }
 
-    print(f"   - FastQ records: {len(related_data['fastq'])}")
-    print(f"   - MLST records: {len(related_data['mlst'])}")
-    print(f"   - CheckM2 records: {len(related_data['checkm2'])}")
-    print(f"   - Assembly records: {len(related_data['assembly'])}")
-    print(f"   - Gambit records: {len(related_data['gambit'])}")
-    print(f"   - AMRFinder records: {len(related_data['amrfinder'])}")
-
-    # Build context - CRITICAL: match template variable names exactly
+    # ============================================================
+    # Build context required by the template
+    # ============================================================
     context = {
         "entry": {
             "accession": accession,
@@ -2162,27 +2072,17 @@ def get_wgs_details(request, accession):
             "growth": referred.f_Growth,
             "date_collected": referred.f_Spec_Date,
             "referral_date": referred.f_Referral_Date,
-            "antibiotics": antibiotics,
+            "antibiotics": antibiotics,  
             "related_data": related_data,
         }
     }
 
-    print(f"\n CONTEXT TO RENDER:")
-    print(f"   - Accession: {context['entry']['accession']}")
-    print(f"   - Patient Name: {context['entry']['patient_name']}")
-    print(f"   - Age: {context['entry']['age']}")
-    print(f"   - Sex: {context['entry']['sex']}")
-    print(f"   - Specimen: {context['entry']['specimen']}")
-    print(f"   - Antibiotics: {len(context['entry']['antibiotics'])} entries")
-
-    # Render template
+    # Render HTML for AJAX response
     html = render_to_string(
         "wgs_app/Wgs_detail.html",
         context,
         request=request,
     )
-
-    print(f" Template rendered successfully\n")
 
     return JsonResponse({"html": html})
 
@@ -2272,6 +2172,9 @@ def download_matched_wgs_data(request):
     gambit_df = qs_to_df(gambit_qs, "Gambit", "Gambit_Accession")
 
     # ---- Step 6: Merge Final_Data with antibiotics ----
+    abx_df["ab_idNum_f_referred_id"] = abx_df["ab_idNum_f_referred_id"].astype(str)
+    final_df["id"] = final_df["id"].astype(str)
+
     combined_df = final_df.copy()
     if not abx_df.empty:
         abx_df = abx_df.merge(

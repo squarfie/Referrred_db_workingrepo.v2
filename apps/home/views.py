@@ -2938,38 +2938,38 @@ def undo_copy_to_final(request, id):
                     "Mid_Name": getattr(isolates, "f_Mid_Name", ""),
                     "Last_Name": getattr(isolates, "f_Last_Name", ""),
                     "Date_Birth": getattr(isolates, "f_Date_Birth", None),
-                    "f_Age": getattr(isolates, "Age", ""),
-                    "f_Sex": getattr(isolates, "Sex", ""),
-                    "f_Date_Admis": getattr(isolates, "Date_Admis", None),
-                    "f_Diagnosis": getattr(isolates, "Diagnosis", ""),
-                    "f_Diagnosis_ICD10": getattr(isolates, "Diagnosis_ICD10", ""),
-                    "f_Ward": getattr(isolates, "Ward", ""),
-                    "f_Ward_Type": getattr(isolates, "Ward_Type", ""),
-                    "f_Service_Type": getattr(isolates, "Service_Type", "n/a"),
+                    "Age": getattr(isolates, "f_Age", ""),
+                    "Sex": getattr(isolates, "f_Sex", ""),
+                    "Date_Admis": getattr(isolates, "f_Date_Admis", None),
+                    "Diagnosis": getattr(isolates, "f_Diagnosis", ""),
+                    "Diagnosis_ICD10": getattr(isolates, "f_Diagnosis_ICD10", ""),
+                    "Ward": getattr(isolates, "f_Ward", ""),
+                    "Ward_Type": getattr(isolates, "f_Ward_Type", ""),
+                    "Service_Type": getattr(isolates, "f_Service_Type", "n/a"),
 
                     # Specimen
-                    "f_Spec_Num": getattr(isolates, "Spec_Num", ""),
-                    "f_Spec_Date": getattr(isolates, "Spec_Date", None),
-                    "f_Spec_Type": getattr(isolates, "Spec_Type", ""),
-                    "f_Growth": getattr(isolates, "Growth", ""),
-                    "f_Urine_ColCt": getattr(isolates, "Urine_ColCt", ""),
+                    "Spec_Num": getattr(isolates, "f_Spec_Num", ""),
+                    "Spec_Date": getattr(isolates, "f_Spec_Date", None),
+                    "Spec_Type": getattr(isolates, "f_Spec_Type", ""),
+                    "Growth": getattr(isolates, "f_Growth", ""),
+                    "Urine_ColCt": getattr(isolates, "f_Urine_ColCt", ""),
 
                     # Organism
-                    "f_Site_Pre": getattr(isolates, "Site_Pre", ""),
-                    "f_Site_Org": getattr(isolates, "Site_Org", ""),
-                    "f_Site_Pos": getattr(isolates, "Site_Pos", ""),
-                    "f_OrganismCode": getattr(isolates, "OrganismCode", ""),
-                    "f_Comments": getattr(isolates, "Comments", ""),
+                    "Site_Pre": getattr(isolates, "f_Site_Pre", ""),
+                    "Site_Org": getattr(isolates, "f_Site_Org", ""),
+                    "Site_Pos": getattr(isolates, "f_Site_Pos", ""),
+                    "OrganismCode": getattr(isolates, "f_OrganismCode", ""),
+                    "Comments": getattr(isolates, "f_Comments", ""),
                 },
             )
 
-            # --- Clear existing entries in Final_AntibioticEntry ---
+            # --- Clear existing entries in AntibioticEntry ---
             AntibioticEntry.objects.filter(ab_idNum_referred=raw_obj).delete() 
 
             # --- Copy each AntibioticEntry record ---
             for entry in all_entries: 
-                final_entry = Final_AntibioticEntry.objects.create(
-                    ab_idNum_f_referred=final_obj,
+                raw_entry = AntibioticEntry.objects.create(
+                    ab_idNum_f_referred=raw_obj,
                     ab_AccessionNo=entry.ab_AccessionNo,
                     ab_RefNo=getattr(isolates, "RefNo", ""),
                     ab_Antibiotic=entry.ab_Antibiotic,
@@ -3003,11 +3003,11 @@ def undo_copy_to_final(request, id):
                 )
 
                 # Copy M2M breakpoints
-                final_entry.ab_breakpoints_id.set(entry.ab_breakpoints_id.all())
+                raw_entry.ab_breakpoints_id.set(entry.ab_breakpoints_id.all())
 
             messages.success(
                 request,
-                f"Data successfully copied to Final_Data (Accession: {isolates.AccessionNo})."
+                f"Data successfully copied to Raw Data (Accession: {isolates.f_AccessionNo})."
             )
 
         return redirect("show_data")
@@ -3015,7 +3015,7 @@ def undo_copy_to_final(request, id):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        messages.error(request, f"⚠️ Error copying data: {e}")
+        messages.error(request, f" Error copying data: {e}")
         return redirect("show_data")
 
     
@@ -3607,7 +3607,7 @@ def generate_mapped_excel(request):
                 .str.upper()
                 .values
             )
-            abx_data[f"{base_upper}_MIC_op"] = list(mic_operands)
+            abx_data[f"{base_upper}_NM_op"] = list(mic_operands)
 
             # --- Disk values (no operand) ---
             abx_data[f"{base_upper}_ND"] = safe_get_series(disk_col).values

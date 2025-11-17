@@ -153,13 +153,14 @@
                   <a href="{%url 'edit_data' isolate.id %}" class="text-success"> <i class="fa fa-pencil-alt" aria-hidden="true"></i> &nbspEdit</a> <span style="display: block; line-height: 8px;"><br></span>
                 <a href="#" class="text-danger delete-btn" data-toggle="modal" data-target="#deleteModal" data-url="{% url 'delete_data' isolate.id %}">
                 <i class="fa fa-trash" aria-hidden="true"></i> &nbspDelete</a> <span style="display: block; line-height: 8px;"><br></span>
+
                 <button 
                   type="button" 
                   class="btn btn-success btn-sm"
                   onclick="if(confirm('Copy this isolate to Final Data?')) { window.location.href='{% url 'copy_data_to_final' id=isolate.id %}'; }">
                   Copy to Final
                 </button>
-                    
+
                   </td>
                   <td style="text-align: center;">
                       {% if isolate.AccessionNo in copied_ids %}
@@ -176,8 +177,10 @@
                           type="checkbox" 
                           class="form-check-input" 
                           id="copyCheckbox_{{ isolate.id }}" 
-                          onclick="if(confirm('Copy this isolate to Final Data?')) { window.location.href='{% url 'copy_data_to_final' id=isolate.id %}'; } else { this.checked=false; }">
+                          onclick="if(confirm('Copy this isolate to Final Data?')) { window.location.href='{% url 'copy_data_to_final' id=isolate.id %}'; } else { this.checked=false; }"
+                          disabled>
                       {% endif %}
+
                   </td>
 
                   <td colspan="2">
@@ -266,35 +269,7 @@
 
           </div>
 
-              <!-- DELETE MODAL -->
-              <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header bg-danger">
-                      <h6 class="modal-title text-white" id="deleteModalLabel">
-                        <i class="fa fa-exclamation-triangle mr-2"></i>Delete Confirmation
-                      </h6>
-                      <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">
-                      <h5 style="color: #333;">Are you sure you want to delete this record?</h5>
-                      <p class="text-muted">This action cannot be undone.</p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fa fa-times mr-2"></i>Cancel
-                      </button>
-                      <a id="confirmDeleteBtn" href="#" class="btn btn-danger">
-                        <i class="fa fa-trash mr-2"></i>Delete Record
-                      </a>
 
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
                         <!-- Card footer -->
           <div class="card-footer py-4">
             <nav aria-label="...">
@@ -377,7 +352,35 @@
     </div>
   
   </div>
+              <!-- DELETE MODAL -->
+              <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                      <h6 class="modal-title text-white" id="deleteModalLabel">
+                        <i class="fa fa-exclamation-triangle mr-2"></i>Delete Confirmation
+                      </h6>
+                      <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <h5 style="color: #333;">Are you sure you want to delete this record?</h5>
+                      <p class="text-muted">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times mr-2"></i>Cancel
+                      </button>
+                      <a id="confirmDeleteBtn" href="#" class="btn btn-danger">
+                        <i class="fa fa-trash mr-2"></i>Delete Record
+                      </a>
 
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 {% endblock content %}
 
 <!-- Specific JS goes HERE --> 

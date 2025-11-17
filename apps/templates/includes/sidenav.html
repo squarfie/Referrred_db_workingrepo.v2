@@ -20,12 +20,12 @@
             background: #f0f2f5
         }
 </style>
-<nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white sidenav-font" id="sidenav-main" style="z-index: 9999;">
+<nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white sidenav-font" id="sidenav-main" style="z-index: 99999;">
   <div class="scrollbar-inner">
     <!-- Brand -->
     <div class="sidenav-header  align-items-center">
       <a class="navbar-brand" href="/" >
-        <img src="/static/assets/img/brand/arsp.png" class="navbar-brand-img" alt="Egasp" style="width: 120px; height: 100px; object-fit: contain;">
+        <img src="/static/assets/img/brand/arsp.png" class="navbar-brand-img" alt="ARSRL" style="width: 120px; height: 100px; object-fit: contain;">
       </a>
     </div>
     <div class="navbar-inner">
@@ -91,81 +91,7 @@
             </a>
 
           </li>
-          <!-- Modal -->
-           <div class="modal fade" id="ageModal" tabindex="-1" role="dialog" aria-labelledby="ageModalLabel" aria-hidden="true" style="z-index: 9999;">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="ageModalLabel">Age Verifier</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <hr class="my-4" />
-                  <div class="container">
-                    <div class="col-lg-12">
-                      <div class="row">
-                          <div class="col-lg-4">
-                              <label class='form-control-label'>Birth Date:</label>
-                          </div>
-                          <div class="col-lg-8">
-                              <div class="row">
-                                  <div class="col-lg-4">
-                                      <label class="form-control-label">Month</label>
-                                      <input style="font-size: small;"    class="form-control" type="number" name="month" id="month" placeholder="mm" required="required" minlength="1" maxlength="2" min="1" max="12"/>
-                                  </div>
-                                  <div class="col-lg-4">
-                                      <label class="form-control-label">Day</label>
-                                      <input style="font-size: small;"  class="form-control" type="number" name="date" id="date" placeholder="dd" required="required" minlength="1" maxlength="2"  min="0" max="31"/>                      
-                                  </div>
-                                  <div class="col-lg-4">
-                                      <label class="form-control-label">Year</label>
-                                      <input  style="font-size: small;"  class="form-control" type="number" name="year" id="year" placeholder="yyyy" required="required" minlength="4" maxlength="4" min="0000" max="9999"/>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                    </div>
-                      <br>
-                      <div class="col-lg-12">
-                      <div class="row">
-                        <div class="col-lg-4">
-                            <label class='form-control-label'>Consult Date:</label>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <label class="form-control-label">Month</label>
-                                    <input style="font-size: small;" class="form-control" type="number" name="month" id="month2" placeholder="mm" required="required" minlength="1" maxlength="2" min="1" max="12"/>
-                                </div>
-                                <div class="col-lg-4">
-                                    <label class="form-control-label">Day</label>
-                                    <input style="font-size: small;" class="form-control" type="number" name="date" id="date2" placeholder="dd" required="required" minlength="1" maxlength="2"  min="0" max="31"/>                      
-                                </div>
-                                <div class="col-lg-4">
-                                    <label class="form-control-label">Year</label>
-                                    <input style="font-size: small;" class="form-control" type="number" name="year" id="year2" placeholder="yyyy" required="required" minlength="4" maxlength="4" min="0000" max="9999"/>
-                                </div>
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div style="align-self: center;" id="age"></div> 
-                  
-                  <hr class="my-4" />
-              </div>
-                <div class="modal-footer">
-                  <input type="button" class="btn btn-primary" name="submit" value="Submit" onclick="age()" />
-                  <button type="button" class="btn btn-success" onclick="refresh()">Refresh</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                 
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- end of modal -->
+
           <li class="nav-item">
             <a class="nav-link" href="{% url 'field_mapper_tool' %}">
               <i class="ni ni-compass-04 text-success"></i>
@@ -258,6 +184,83 @@
       </div>
     </div>
   </div>
+
+
+            <!-- Modal -->
+           <div class="modal fade" id="ageModal" tabindex="-1" role="dialog" aria-labelledby="ageModalLabel" aria-hidden="true" style="z-index: 9999;">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="ageModalLabel">Age Verifier</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <hr class="my-4" />
+                  <div class="container">
+                    <div class="col-lg-12">
+                      <div class="row">
+                          <div class="col-lg-4">
+                              <label class='form-control-label'>Birth Date:</label>
+                          </div>
+                          <div class="col-lg-8">
+                              <div class="row">
+                                  <div class="col-lg-4">
+                                      <label class="form-control-label">Month</label>
+                                      <input style="font-size: small;"    class="form-control" type="number" name="month" id="month" placeholder="mm" required="required" minlength="1" maxlength="2" min="1" max="12"/>
+                                  </div>
+                                  <div class="col-lg-4">
+                                      <label class="form-control-label">Day</label>
+                                      <input style="font-size: small;"  class="form-control" type="number" name="date" id="date" placeholder="dd" required="required" minlength="1" maxlength="2"  min="0" max="31"/>                      
+                                  </div>
+                                  <div class="col-lg-4">
+                                      <label class="form-control-label">Year</label>
+                                      <input  style="font-size: small;"  class="form-control" type="number" name="year" id="year" placeholder="yyyy" required="required" minlength="4" maxlength="4" min="0000" max="9999"/>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                      <br>
+                      <div class="col-lg-12">
+                      <div class="row">
+                        <div class="col-lg-4">
+                            <label class='form-control-label'>Consult Date:</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label class="form-control-label">Month</label>
+                                    <input style="font-size: small;" class="form-control" type="number" name="month" id="month2" placeholder="mm" required="required" minlength="1" maxlength="2" min="1" max="12"/>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-control-label">Day</label>
+                                    <input style="font-size: small;" class="form-control" type="number" name="date" id="date2" placeholder="dd" required="required" minlength="1" maxlength="2"  min="0" max="31"/>                      
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-control-label">Year</label>
+                                    <input style="font-size: small;" class="form-control" type="number" name="year" id="year2" placeholder="yyyy" required="required" minlength="4" maxlength="4" min="0000" max="9999"/>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="align-self: center;" id="age"></div> 
+                  
+                  <hr class="my-4" />
+              </div>
+                <div class="modal-footer">
+                  <input type="button" class="btn btn-primary" name="submit" value="Submit" onclick="age()" />
+                  <button type="button" class="btn btn-success" onclick="refresh()">Refresh</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                 
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end of modal -->
   <script>
     // FOR AGE VERIFIER BUTTON
     function age() {

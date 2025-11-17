@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404 
 from django.template import loader
 from django.db.models import Prefetch
-
+from decimal import Decimal, InvalidOperation
 from .models import *
 from .forms import *
 
@@ -623,7 +623,7 @@ def upload_final_combined_table(request):
             print("\n[DEBUG] Headers after normalization:", list(df.columns))
 
             # --- Handle transposed sheet case ---
-            if df.shape[0] < df.shape[1] and "f_accessionno" not in df.columns:
+            if df.shape[0] < df.shape[1] and "f_AccessionNo" not in df.columns:
                 df = df.transpose()
                 df.columns = df.iloc[0].astype(str)
                 df = df.iloc[1:].reset_index(drop=True)
@@ -705,7 +705,7 @@ def upload_final_combined_table(request):
 
             messages.success(
                 request,
-                f"✅ Upload complete! {created_ref} new records, {updated_ref} updated."
+                f"Upload complete! {created_ref} new records, {updated_ref} updated."
             )
             return redirect("show_final_data")
 
@@ -743,6 +743,7 @@ def show_final_data(request):
          "total_records": total_records,
          },  # only send page_obj
     )
+
 
 
 
@@ -797,467 +798,863 @@ def delete_finaldata_by_date(request):
 
 
 #uploading antibiotic entries
+# @login_required
+# @transaction.atomic
+# def upload_antibiotic_entries(request):
+#     if request.method != "POST" or not request.FILES.get("FinalAntibioticFile"):
+#         return render(request, "wgs_app/Add_wgs.html", {
+#             "form": WGSProjectForm(),
+#             "antibiotic_form": FinalAntibioticUploadForm(),
+#             "referred_form": FinalAntibioticUploadForm(),
+#         })
+
+#     try:
+#         uploaded_file = request.FILES["FinalAntibioticFile"]
+#         file_name = uploaded_file.name.lower()
+
+#         # --------------------------
+#         # LOAD FILE
+#         # --------------------------
+#         if file_name.endswith(".csv"):
+#             wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
+#             df = pd.read_csv(wrapper)
+#         else:
+#             df = pd.read_excel(uploaded_file)
+
+#         df.columns = df.columns.str.strip().str.lower()
+
+#         if "f_accessionno" not in df.columns or "year" not in df.columns:
+#             messages.error(request, "Missing required columns: f_accessionno, year")
+#             return redirect("upload_antibiotic_entries")
+
+#         # --------------------------
+#         # HELPER: clean numeric value
+#         # --------------------------
+#         def clean_numeric(val):
+#             if pd.isna(val):
+#                 return None
+
+#             val = str(val).strip()
+
+#             # Ignore text or special characters
+#             if val in ["", "-", "ND", "NOT DONE", "NA"]:
+#                 return None
+
+#             # Remove operand part for MIC parsing
+#             val = val.lstrip("<=>").strip()
+
+#             try:
+#                 num = float(val)
+#                 if abs(num) <= 99.999:
+#                     return round(num, 3)
+#             except:
+#                 return None
+
+#             return None
+
+#         # --------------------------
+#         # HELPER: extract operand (MIC only)
+#         # --------------------------
+#         def extract_operand(raw):
+#             if raw is None or pd.isna(raw):
+#                 return ""
+#             raw = str(raw).strip()
+#             if raw.startswith(("≤", "<=", "<", ">=", ">")):
+#                 if raw.startswith("≤"): return "≤"
+#                 if raw.startswith("<="): return "<="
+#                 if raw.startswith("<"): return "<"
+#                 if raw.startswith(">="): return ">="
+#                 if raw.startswith(">"): return ">"
+#             return ""
+
+#         # -----------------------------------
+#         # DETECT ANTIBIOTIC COLUMNS
+#         # -----------------------------------
+#         abx_codes = [c for c in df.columns if c not in ["f_accessionno", "year"]]
+
+#         # -----------------------------------
+#         # PREFETCH ALL Final_Data
+#         # -----------------------------------
+#         accessions = df["f_accessionno"].astype(str).str.strip().unique()
+#         acc_refs = {r.f_AccessionNo: r for r in Final_Data.objects.filter(f_AccessionNo__in=accessions)}
+
+#         created = updated = skipped = errors = 0
+
+#         for idx, row in df.iterrows():
+#             accession = str(row["f_accessionno"]).strip()
+#             year = str(row["year"]).strip()
+
+#             ref = acc_refs.get(accession)
+#             if not ref:
+#                 skipped += 1
+#                 continue
+
+#             for abx in abx_codes:
+#                 raw = row.get(abx)
+#                 if pd.isna(raw) or str(raw).strip() in ["", "nan"]:
+#                     continue
+
+#                 raw_str = str(raw).strip()
+
+#                 # Determine if MIC or DISK
+#                 abx_upper = abx.upper()
+#                 is_mic = "_NM" in abx_upper or "MIC" in abx_upper
+#                 is_disk = "_ND" in abx_upper or "DISK" in abx_upper or not is_mic
+
+#                 operand = extract_operand(raw_str) if is_mic else ""
+
+#                 numeric_val = clean_numeric(raw_str)
+#                 if numeric_val is None:
+#                     numeric_val = None
+
+#                 # Extract RIS
+#                 ris = ""
+#                 if raw_str.upper() in ["R", "S", "I", "SDD"]:
+#                     ris = raw_str.upper()
+
+#                 # Correct RIS placement
+#                 mic_ris = ris if is_mic else ""
+#                 disk_ris = ris if is_disk else ""
+
+#                 entry_data = {
+#                     "ab_Abx": abx,
+#                     "ab_Abx_code": abx,
+#                     "ab_AccessionNo": accession,
+#                     "ab_MIC_value": numeric_val if is_mic else None,
+#                     "ab_Disk_value": numeric_val if is_disk else None,
+#                     "ab_MIC_enRIS": mic_ris,
+#                     "ab_Disk_enRIS": disk_ris,
+#                     "ab_MIC_operand": operand if is_mic else "",
+#                 }
+
+#                 try:
+#                     obj, created_flag = Final_AntibioticEntry.objects.update_or_create(
+#                         ab_idNum_f_referred=ref,
+#                         ab_Abx_code=abx,
+#                         defaults=entry_data,
+#                     )
+
+#                     if created_flag:
+#                         created += 1
+#                     else:
+#                         updated += 1
+
+#                 except Exception as e:
+#                     errors += 1
+#                     print(f"[UPLOAD ERROR] Row {idx}, Abx {abx}: {e}")
+
+#         messages.success(request,
+#             f"Upload finished: {created} created, {updated} updated, {skipped} skipped, {errors} errors"
+#         )
+#         return redirect("show_final_data")
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         messages.error(request, f"Fatal upload error: {str(e)}")
+#         return redirect("upload_antibiotic_entries")
+
+
 
 # @login_required
 # @transaction.atomic
 # def upload_antibiotic_entries(request):
 #     """
-#     Smart upload: Handles duplicate antibiotic columns (value + RIS),
-#     distinguishes between MIC (_NM) and Disk (_ND) values,
-#     and safely handles NaN and empty fields.
+#     Final, validated version — full operand support (embedded or separate column)
 #     """
-#     form = WGSProjectForm()
-#     antibiotic_form = FinalAntibioticUploadForm()
 
-#     if request.method == "POST" and request.FILES.get("FinalAntibioticFile"):
-#         try:
-#             uploaded_file = request.FILES["FinalAntibioticFile"]
-#             file_name = uploaded_file.name.lower()
+#     if request.method != "POST" or not request.FILES.get("FinalAntibioticFile"):
+#         messages.error(request, "No file uploaded.")
+#         return redirect("upload_antibiotic_entries")
 
-#             # --- Load file ---
-#             if file_name.endswith(".csv"):
-#                 wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
-#                 df = pd.read_csv(wrapper)
-#             elif file_name.endswith((".xlsx", ".xls")):
-#                 df = pd.read_excel(uploaded_file)
-#             else:
-#                 messages.error(request, "Unsupported file format. Please upload CSV or Excel.")
-#                 return redirect("upload_antibiotic_entries")
+#     try:
+#         uploaded_file = request.FILES["FinalAntibioticFile"]
+#         file_name = uploaded_file.name.lower()
 
-#             # --- Apply user-defined mappings ---
-#             user_mappings = dict(
-#                 FieldMapping.objects.filter(user=request.user)
-#                 .values_list("raw_field", "mapped_field")
-#             )
-#             if user_mappings:
-#                 df.rename(columns=user_mappings, inplace=True)
-#                 print(f"[UPLOAD] Applied {len(user_mappings)} field mappings.")
-#             else:
-#                 messages.warning(request, "No saved field mappings found. Using raw headers.")
+#         # --------------------------
+#         # LOAD FILE
+#         # --------------------------
+#         if file_name.endswith(".csv"):
+#             wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
+#             df = pd.read_csv(wrapper)
+#         else:
+#             df = pd.read_excel(uploaded_file)
 
-#             # --- Normalize headers ---
-#             df.columns = df.columns.str.strip().str.lower()
+#         # Normalize column names
+#         df.columns = df.columns.str.strip().str.lower()
 
-#             # --- Check required columns ---
-#             required_cols = ["f_accessionno", "year"]
-#             missing = [col for col in required_cols if col not in df.columns]
-#             if missing:
-#                 messages.error(request, f"Missing required columns: {', '.join(missing)}")
-#                 return redirect("upload_antibiotic_entries")
+#         # Required fields
+#         if "f_accessionno" not in df.columns or "year" not in df.columns:
+#             messages.error(request, "Missing required columns: f_accessionno, year")
+#             return redirect("upload_antibiotic_entries")
 
-#             created_count = updated_count = skipped = 0
+#         # --------------------------
+#         # NUMERIC CLEANER
+#         # --------------------------
+#         def clean_numeric(val):
+#             if pd.isna(val):
+#                 return None
 
-#             # --- Detect duplicate antibiotics (paired columns) ---
-#             col_counts = df.columns.value_counts()
-#             duplicates = [col for col, count in col_counts.items() if count > 1 and col not in ["f_accessionno", "year"]]
+#             val = str(val).strip()
 
-#             abx_pairs = {}
-#             for abx in duplicates:
-#                 abx_indices = [i for i, c in enumerate(df.columns) if c == abx]
-#                 if len(abx_indices) >= 2:
-#                     abx_pairs[abx] = {
-#                         "value_idx": abx_indices[0],
-#                         "ris_idx": abx_indices[1],
-#                     }
+#             # Ignore text or special characters
+#             if val in ["", "-", "ND", "NOT DONE", "NA"]:
+#                 return None
 
-#             # --- Include non-duplicates ---
-#             for c in df.columns:
-#                 if c not in ["f_accessionno", "year"] and c not in abx_pairs:
-#                     abx_pairs[c] = {"value_idx": df.columns.get_loc(c)}
+#             # Remove operand part for MIC parsing
+#             val = val.lstrip("<=>").strip()
 
-#             print(f"[UPLOAD] Found {len(abx_pairs)} antibiotic pairs (disk+MIC combined).")
-
-#             # --- Helper: safely clean numeric fields --
-#             def clean_numeric(value):
-#                 if pd.isna(value) or str(value).strip().lower() in ["nan", "none", ""]:
-#                     return None
-#                 try:
-#                     num = float(value)
-#                     # Cap it safely if it's too large
-#                     if abs(num) > 99999:
-#                         print(f"[WARN] Skipping large numeric value: {value}")
-#                         return None
+#             try:
+#                 num = float(val)
+#                 if abs(num) <= 99.999:
 #                     return round(num, 3)
-#                 except ValueError:
-#                     return None
+#             except:
+#                 return None
 
+#             return None
 
-#             # --- Process each row ---
-#             for _, row in df.iterrows():
-#                 accession = str(row.get("f_accessionno", "")).strip()
-#                 year = str(row.get("year", "")).strip()
-#                 if not accession:
+#         # --------------------------
+#         # OPERAND EXTRACTOR
+#         # --------------------------
+#         def extract_operand(raw):
+#             if raw is None:
+#                 return ""
+#             raw = str(raw).strip()
+#             for op in ["≤", "<=", "<", ">=", ">"]:
+#                 if raw.startswith(op):
+#                     return op
+#             return ""
+
+#         # --------------------------
+#         # IDENTIFY ANTIBIOTIC COLUMNS
+#         # --------------------------
+#         base_cols = ["f_accessionno", "year"]
+#         abx_columns = [c for c in df.columns if c not in base_cols]
+
+#         accession_values = df["f_accessionno"].astype(str).str.strip().unique()
+#         ref_map = {
+#             r.f_AccessionNo: r
+#             for r in Final_Data.objects.filter(f_AccessionNo__in=accession_values)
+#         }
+
+#         created = updated = skipped = errors = 0
+
+#         # --------------------------
+#         # MAIN IMPORT LOOP
+#         # --------------------------
+#         for idx, row in df.iterrows():
+
+#             accession = str(row["f_accessionno"]).strip()
+#             ref = ref_map.get(accession)
+
+#             if not ref:
+#                 skipped += 1
+#                 continue
+
+#             for col in abx_columns:
+#                 raw = row.get(col)
+
+#                 # skip blank
+#                 if raw is None or (isinstance(raw, float) and pd.isna(raw)) or str(raw).strip() == "":
 #                     continue
 
-#                 ref = Final_Data.objects.filter(f_AccessionNo=accession).first()
-#                 if not ref:
-#                     skipped += 1
-#                     continue
+#                 raw_str = str(raw).strip()
+#                 col_upper = col.upper()
 
-#                 for abx_code, cols in abx_pairs.items():
-#                     numeric_value = ""
-#                     ris_value = ""
+#                 # Detect MIC and ND antibiotics
+#                 is_mic_col = any(x in col_upper for x in ["_NM", "MIC"])
+#                 is_disk_col = (("_ND" in col_upper) or ("DISK" in col_upper)) and not is_mic_col
 
-#                     if "value_idx" in cols:
-#                         numeric_value = row.iloc[cols["value_idx"]]
-#                     if "ris_idx" in cols:
-#                         ris_value = str(row.iloc[cols["ris_idx"]]).strip().upper()
+#                 # Extract operand ALWAYS
+#                 operand = extract_operand(raw_str)
 
-#                     if pd.isna(numeric_value) and not ris_value:
-#                         continue
+#                 # If separate operand column exists, override
+#                 separate_op_col = f"{col.lower()}_op"
+#                 if separate_op_col in df.columns:
+#                     extra_operand = row.get(separate_op_col)
+#                     if extra_operand and str(extra_operand).strip().lower() not in ["", "nan"]:
+#                         operand = str(extra_operand).strip()
 
-#                     # --- Match breakpoint ---
-#                     bp = BreakpointsTable.objects.filter(
-#                         Whonet_Abx__iexact=abx_code,
-#                         Year=str(year)
-#                     ).first()
+#                 # --------------------------
+#                 # SAFE RIS extraction
+#                 # --------------------------
+#                 ris = ""
+#                 ris_col = f"{col.lower()}_ris"
 
-#                     abx_upper = abx_code.upper()
-#                     disk_value = mic_value = None
+#                 if ris_col in df.columns:
+#                     ris_raw = row.get(ris_col, "")
+#                     ris = str(ris_raw).strip().upper()
 
-#                     # --- Classify & clean ---
-#                     if "_ND" in abx_upper:
-#                         disk_value = clean_numeric(numeric_value)
-#                     elif "_NM" in abx_upper:
-#                         mic_value = clean_numeric(numeric_value)
-#                     else:
-#                         # fallback: assume disk if not labeled
-#                         disk_value = clean_numeric(numeric_value)
+#                 # If raw cell is already RIS
+#                 if raw_str.upper() in ["R", "S", "I", "SDD"]:
+#                     ris = raw_str.upper()
 
-#                     ris_value = ris_value if ris_value in ["R", "I", "S"] else ""
+#                 # --------------------------
+#                 # Numeric value
+#                 # --------------------------
+#                 numeric_val = clean_numeric(raw_str)
+#                 if operand and numeric_val is None:
+#                     numeric_val = None
 
-#                     # --- Create or update entry ---
-#                     ab_entry, created = Final_AntibioticEntry.objects.update_or_create(
+#                 # Prepare model fields
+#                 entry_data = {
+#                     "ab_Abx": col,
+#                     "ab_Abx_code": col,
+#                     "ab_AccessionNo": accession,
+#                     "ab_MIC_value": numeric_val if is_mic_col else None,
+#                     "ab_Disk_value": numeric_val if is_disk_col else None,
+#                     "ab_MIC_enRIS": ris if is_mic_col else "",
+#                     "ab_Disk_enRIS": ris if is_disk_col else "",
+#                     "ab_MIC_operand": operand if is_mic_col else "",
+#                 }
+
+#                 try:
+#                     obj, created_flag = Final_AntibioticEntry.objects.update_or_create(
 #                         ab_idNum_f_referred=ref,
-#                         ab_Abx_code=abx_code,
-#                         defaults={
-#                             "ab_Antibiotic": abx_code,
-#                             "ab_AccessionNo": accession,
-#                             "ab_MIC_value": mic_value,
-#                             "ab_Disk_value": disk_value,
-#                             "ab_MIC_enRIS": ris_value,
-#                         },
+#                         ab_Abx_code=col,
+#                         defaults=entry_data,
 #                     )
 
-#                     if bp:
-#                         ab_entry.ab_breakpoints_id.set([bp])
-
-#                     if created:
-#                         created_count += 1
+#                     if created_flag:
+#                         created += 1
 #                     else:
-#                         updated_count += 1
+#                         updated += 1
 
-#             messages.success(
-#                 request,
-#                 f"✅ Antibiotic upload complete! {created_count} new, {updated_count} updated, {skipped} skipped."
-#             )
-#             return redirect("show_final_data")
+#                 except Exception as e:
+#                     errors += 1
+#                     print(f"[ERROR] Row {idx}, Abx {col}: {e}")
 
-#         except Exception as e:
-#             import traceback
-#             traceback.print_exc()
-#             messages.error(request, f" Error during antibiotic upload: {e}")
+#         messages.success(
+#             request,
+#             f"Upload Result → Created: {created}, Updated: {updated}, Skipped: {skipped}, Errors: {errors}"
+#         )
+#         return redirect("show_final_antibiotic")
 
-#     return render(request, "wgs_app/Add_wgs.html", {
-#         "form": form,
-#         "antibiotic_form": antibiotic_form,
-#         "referred_form": FinalDataUploadForm(),
-#     })
+#     except Exception as e:
+#         transaction.set_rollback(True)
+#         messages.error(request, f"Fatal Error: {str(e)}")
+#         return redirect("show_final_antibiotic")
+
+# @login_required
+# @transaction.atomic
+# def upload_antibiotic_entries(request):
+
+#     if request.method != "POST" or "FinalAntibioticFile" not in request.FILES:
+#         messages.error(request, "No file uploaded.")
+#         return redirect("upload_antibiotic_entries")
+
+#     try:
+#         uploaded_file = request.FILES["FinalAntibioticFile"]
+#         file_name = uploaded_file.name.lower()
+
+#         # Load CSV/Excel
+#         if file_name.endswith(".csv"):
+#             wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
+#             df = pd.read_csv(wrapper)
+#         else:
+#             df = pd.read_excel(uploaded_file)
+
+#         df.columns = df.columns.str.strip().str.lower()
+
+#         # Required column
+#         if "f_accessionno" not in df.columns:
+#             messages.error(request, "Missing column f_accessionno")
+#             return redirect("upload_antibiotic_entries")
+
+#         # Numeric cleaner
+#         def clean_numeric(val):
+#             if pd.isna(val):
+#                 return None
+#             val = str(val).strip()
+#             val = val.lstrip("<=>≥≤").strip()
+#             try:
+#                 return round(float(val), 3)
+#             except:
+#                 return None
+
+#         # Operand extractor
+#         def extract_operand(raw):
+#             raw = str(raw).strip()
+#             for op in ["≤", "<=", ">=", "<", ">"]:
+#                 if raw.startswith(op):
+#                     return op
+#             return ""
+
+#         # Map accessions
+#         acc_values = df["f_accessionno"].astype(str).str.strip().unique()
+#         ref_map = {
+#             r.f_AccessionNo: r
+#             for r in Final_Data.objects.filter(f_AccessionNo__in=acc_values)
+#         }
+
+#         created = updated = skipped = errors = 0
+
+#         # -------------------------------------------------------
+#         # MAIN LOOP
+#         # -------------------------------------------------------
+#         for idx, row in df.iterrows():
+
+#             accession = str(row["f_accessionno"]).strip()
+#             ref = ref_map.get(accession)
+
+#             if not ref:
+#                 skipped += 1
+#                 continue
+
+#             for col in df.columns:
+#                 if col in ["f_accessionno", "year"]:
+#                     continue
+
+#                 raw = row.get(col)
+#                 raw_str = "" if raw is None or pd.isna(raw) else str(raw).strip()
+
+#                 col_upper = col.upper()
+#                 parts = col_upper.split("_")
+#                 base = parts[0]
+
+#                 # -------------------------------------------------------
+#                 # COLUMN TYPE DETECTION (RIS → MIC → DISK → OP)
+#                 # -------------------------------------------------------
+
+#                 # 1) Skip RIS columns completely
+#                 if col_upper.endswith("_RIS"):
+#                     continue
+
+#                 # 2) MIC numeric column: e.g., AMK_NM
+#                 if col_upper.endswith("_NM") and col_upper.count("_") == 1:
+#                     full_code = col_upper          # AMK_NM
+#                     is_mic_col = True
+#                     is_disk_col = False
+
+#                 # 3) Disk numeric column: e.g., AMK_ND30
+#                 elif "_ND" in col_upper and col_upper.count("_") == 1:
+#                     full_code = col_upper          # AMK_ND30
+#                     is_mic_col = False
+#                     is_disk_col = True
+
+#                 # 4) Operand column: e.g., AMK_MIC_OP
+#                 elif col_upper.endswith("_MIC_OP"):
+#                     full_code = f"{base}_NM"       # operand belongs to MIC antibiotic
+#                     is_mic_col = True
+#                     is_disk_col = False
+
+#                 # 5) Anything else → skip
+#                 else:
+#                     continue
+
+#                 # -------------------------------------------------------
+#                 # Extract operand
+#                 # -------------------------------------------------------
+#                 operand = extract_operand(raw_str)
+
+#                 # Possible separate operand columns
+#                 possible_operand_cols = [
+#                     f"{col.lower()}_op",
+#                     f"{base.lower()}_mic_op",
+#                     f"{full_code.lower()}_op",
+#                 ]
+
+#                 for op_col in possible_operand_cols:
+#                     if op_col in df.columns:
+#                         op_val = row.get(op_col)
+#                         if op_val not in [None, "", " ", float("nan")]:
+#                             operand = str(op_val).strip()
+#                             break
+
+#                 # Skip blank numeric with no operand
+#                 if raw_str == "" and operand == "":
+#                     continue
+
+#                 # -------------------------------------------------------
+#                 # Extract RIS
+#                 # -------------------------------------------------------
+#                 ris = ""
+#                 ris_col = f"{col.lower()}_ris"
+
+#                 # If RIS column exists and matches this antibiotic numeric column
+#                 if ris_col in df.columns:
+#                     ris_raw = row.get(ris_col)
+#                     if ris_raw not in [None, "", " "]:
+#                         ris = str(ris_raw).strip().upper()
+
+#                 # Embedded RIS (cell contains only R/S/I/SDD)
+#                 if raw_str.upper() in ["R", "S", "I", "SDD"]:
+#                     ris = raw_str.upper()
+
+#                 # -------------------------------------------------------
+#                 # Numeric value
+#                 # -------------------------------------------------------
+#                 numeric_val = clean_numeric(raw_str)
+
+#                 # -------------------------------------------------------
+#                 # Build model entry
+#                 # -------------------------------------------------------
+#                 entry_data = {
+#                     "ab_Abx": base,
+#                     "ab_Abx_code": full_code,
+#                     "ab_AccessionNo": accession,
+#                     "ab_MIC_value": numeric_val if is_mic_col else None,
+#                     "ab_Disk_value": numeric_val if is_disk_col else None,
+#                     "ab_MIC_operand": operand if is_mic_col else "",
+#                     "ab_MIC_enRIS": ris if is_mic_col else "",
+#                     "ab_Disk_enRIS": ris if is_disk_col else "",
+#                 }
+
+#                 # -------------------------------------------------------
+#                 # DB SAVE
+#                 # -------------------------------------------------------
+#                 try:
+#                     obj, created_flag = Final_AntibioticEntry.objects.update_or_create(
+#                         ab_idNum_f_referred=ref,
+#                         ab_Abx_code=full_code,
+#                         defaults=entry_data,
+#                     )
+#                     created += created_flag
+#                     updated += (not created_flag)
+
+#                 except Exception as e:
+#                     print(f"[ERROR] Row {idx}, col {col}: {e}")
+#                     errors += 1
+
+#         messages.success(
+#             request,
+#             f"Created: {created}, Updated: {updated}, Skipped: {skipped}, Errors: {errors}"
+#         )
+#         return redirect("show_final_antibiotic")
+
+#     except Exception as e:
+#         transaction.set_rollback(True)
+#         messages.error(request, f"Fatal Error: {str(e)}")
+#         return redirect("show_final_antibiotic")
 
 
 
 @login_required
 @transaction.atomic
 def upload_antibiotic_entries(request):
-    """
-    Smart upload: Handles duplicate antibiotic columns (value + RIS),
-    distinguishes between MIC (_NM) and Disk (_ND) values,
-    and safely handles NaN and empty fields.
-    
-    OPTIMIZED: Batch operations, proper decimal handling, and error prevention.
-    """
-    form = WGSProjectForm()
-    antibiotic_form = FinalAntibioticUploadForm()
 
-    if request.method == "POST" and request.FILES.get("FinalAntibioticFile"):
-        try:
-            uploaded_file = request.FILES["FinalAntibioticFile"]
-            file_name = uploaded_file.name.lower()
+    if request.method != "POST" or "FinalAntibioticFile" not in request.FILES:
+        messages.error(request, "No file uploaded.")
+        return redirect("upload_antibiotic_entries")
 
-            # --- Load file ---
-            if file_name.endswith(".csv"):
-                wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
-                df = pd.read_csv(wrapper)
-            elif file_name.endswith((".xlsx", ".xls")):
-                df = pd.read_excel(uploaded_file)
-            else:
-                messages.error(request, "Unsupported file format. Please upload CSV or Excel.")
-                return redirect("upload_antibiotic_entries")
+    try:
+        uploaded_file = request.FILES["FinalAntibioticFile"]
+        file_name = uploaded_file.name.lower()
 
-            # --- Apply user-defined mappings ---
-            user_mappings = dict(
-                FieldMapping.objects.filter(user=request.user)
-                .values_list("raw_field", "mapped_field")
-            )
-            if user_mappings:
-                df.rename(columns=user_mappings, inplace=True)
-                print(f"[UPLOAD] Applied {len(user_mappings)} field mappings.")
-            else:
-                messages.warning(request, "No saved field mappings found. Using raw headers.")
+        # ------------------------------------------------
+        # LOAD FILE
+        # ------------------------------------------------
+        if file_name.endswith(".csv"):
+            wrapper = TextIOWrapper(uploaded_file.file, encoding="utf-8-sig")
+            df = pd.read_csv(wrapper)
+        else:
+            df = pd.read_excel(uploaded_file)
 
-            # --- Normalize headers ---
-            df.columns = df.columns.str.strip().str.lower()
+        # ------------------------------------------------
+        # CLEAN COLUMN NAMES (FIXES 90% OF SKIPS)
+        # ------------------------------------------------
+        import re
 
-            # --- Check required columns ---
-            required_cols = ["f_accessionno", "year"]
-            missing = [col for col in required_cols if col not in df.columns]
-            if missing:
-                messages.error(request, f"Missing required columns: {', '.join(missing)}")
-                return redirect("upload_antibiotic_entries")
+        def normalize_col(c):
+            c = c.strip()
+            c = c.replace("µ", "u")
+            c = re.sub(r"[^A-Za-z0-9]+", "_", c)  # remove spaces, hyphens, brackets
+            c = re.sub(r"_+", "_", c)
+            return c.lower().strip("_")
 
-            # --- Helper: safely parse numeric values (within valid range) ---
-            def clean_numeric(value):
-                """
-                Clean and validate numeric values.
-                For DecimalField(max_digits=5, decimal_places=3):
-                Valid range: -99.999 to 99.999
-                """
-                if pd.isna(value) or str(value).strip().lower() in ["nan", "none", ""]:  # Handle NaN and empty strings
-                    return None
-                
-                try:
-                    num_str = str(value).strip()
-                    num = float(num_str)
-                    
-                    # Validate range for DecimalField(5,3)
-                    # max_digits=5 means total digits, decimal_places=3 means 3 after decimal
-                    # So max value is 99.999, min is -99.999
-                    if abs(num) > 99.999:
-                        print(f"[WARN] Value {num} exceeds DecimalField limit (99.999), skipping")
-                        return None
-                    
-                    # Round to 3 decimal places
-                    return round(num, 3)
-                except (ValueError, TypeError):
-                    return None
+        df.columns = [normalize_col(c) for c in df.columns]
 
-            # --- Detect duplicate antibiotics (paired columns) ---
-            col_counts = df.columns.value_counts()
-            duplicates = [col for col, count in col_counts.items() if count > 1 and col not in ["f_accessionno", "year"]]
-
-            abx_pairs = {}
-            for abx in duplicates: # get antibiotic codes with duplicates
-                abx_indices = [i for i, c in enumerate(df.columns) if c == abx] # get all indices
-                if len(abx_indices) >= 2:
-                    abx_pairs[abx] = {
-                        "value_idx": abx_indices[0], # first occurrence
-                        "ris_idx": abx_indices[1], # second occurrence
-                    }
-
-            # --- Include non-duplicates ---
-            for c in df.columns: # add single columns
-                if c not in ["f_accessionno", "year"] and c not in abx_pairs: # not already added
-                    abx_pairs[c] = {"value_idx": df.columns.get_loc(c)} # get index
-
-            print(f"[UPLOAD] Found {len(abx_pairs)} antibiotic pairs.")
-
-            # --- Pre-fetch all accessions in batch ---
-            accessions = df["f_accessionno"].astype(str).str.strip().unique() # unique accessions
-            acc_refs = {
-                ref.f_AccessionNo: ref 
-                for ref in Final_Data.objects.filter(f_AccessionNo__in=accessions) # prefetch references
-            }
-            print(f"[UPLOAD] Found {len(acc_refs)} matching accessions in database")
-
-            # --- Pre-fetch all breakpoints ---
-            years = df["year"].astype(str).str.strip().unique()
-            breakpoints = BreakpointsTable.objects.filter(Year__in=years) # prefetch breakpoints
-            bp_cache = {} # cache for quick lookup
-            for bp in breakpoints: # build cache
-                key = (bp.Whonet_Abx.upper(), str(bp.Year))
-                bp_cache[key] = bp # map key to breakpoint
-       
-
-            created_count = updated_count = skipped_count = error_count = 0
-            entries_to_create = []
-            entries_to_update = []
-
-            # --- Process each row --- 
-            for row_idx, (_, row) in enumerate(df.iterrows()):  # iterate over rows
-                try:
-                    accession = str(row.get("f_accessionno", "")).strip()
-                    year = str(row.get("year", "")).strip()
-                    
-                    if not accession or accession.lower() == "nan": # skip blank accessions
-                        skipped_count += 1
-                        continue
-
-                    # --- Find reference ---
-                    ref = acc_refs.get(accession) # get pre-fetched reference
-                    if not ref:
-                        skipped_count += 1
-                        continue
-
-                    # --- Process each antibiotic ---
-                    for abx_code, cols in abx_pairs.items():  # iterate over antibiotic pairs
-                        numeric_value = None
-                        ris_value = ""
-
-                        # --- Extract values ---
-                        if "value_idx" in cols: # get numeric value
-                            raw_value = row.iloc[cols["value_idx"]] # extract raw value
-                            numeric_value = clean_numeric(raw_value)# clean and validate
-                        
-                        if "ris_idx" in cols:
-                            raw_ris = row.iloc[cols["ris_idx"]] # extract raw RIS
-                            ris_value = str(raw_ris).strip().upper() if pd.notna(raw_ris) else ""
-
-                        # --- Skip if both empty ---
-                        if numeric_value is None and not ris_value:
-                            continue
-
-                        # --- Classify as disk or MIC ---
-                        abx_upper = abx_code.upper()
-                        disk_value = None
-                        mic_value = None
-
-                        if "_ND" in abx_upper or "DISK" in abx_upper: # disk indicator
-                            disk_value = numeric_value if numeric_value is not None else None # assign disk value if valid
-                        elif "_NM" in abx_upper or "MIC" in abx_upper:
-                            mic_value = numeric_value if numeric_value is not None else None
-                        else:
-                            # Default to disk if no suffix
-                            disk_value = numeric_value if numeric_value is not None else None
-
-                        # --- Validate RIS value ---
-                        ris_value = ris_value if ris_value in ["R", "I", "S", "SDD"] else ""
-
-                        # --- Get breakpoint ---
-                        bp = bp_cache.get((abx_code.upper(), year))
-
-                        # --- Prepare entry data ---
-                        entry_data = {
-                            "ab_Antibiotic": abx_code,
-                            "ab_Abx": abx_code,
-                            "ab_Abx_code": abx_code,
-                            "ab_AccessionNo": accession,
-                            "ab_MIC_value": mic_value,
-                            "ab_Disk_value": disk_value,
-                            "ab_MIC_RIS": ris_value,
-                            "ab_Disk_RIS": ris_value,
-                            "ab_MIC_enRIS": ris_value,
-                            "ab_Disk_enRIS": ris_value,
-                        }
-
-                        # --- Create or update entry ---
-                        entry, created = Final_AntibioticEntry.objects.update_or_create(
-                            ab_idNum_f_referred=ref,
-                            ab_Abx_code=abx_code,
-                            defaults=entry_data,
-                        )
-
-                        # --- Link breakpoint ---
-                        if bp:
-                            entry.ab_breakpoints_id.set([bp])
-
-                        if created:
-                            created_count += 1
-                        else:
-                            updated_count += 1
-
-                except Exception as e:
-                    error_count += 1
-                    print(f"[ERROR] Row {row_idx}: {e}")
-                    continue
-
-            # --- Summary message ---
-            summary = f"Upload Complete: {created_count} created, {updated_count} updated, {skipped_count} skipped"
-            if error_count > 0:
-                summary += f", {error_count} errors"
-            
-            messages.success(request, summary)
-            print(f"[UPLOAD] {summary}")
-            return redirect("show_final_data")
-
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            messages.error(request, f"Error during antibiotic upload: {str(e)}")
+        # ------------------------------------------------
+        # REQUIRED COLUMN
+        # ------------------------------------------------
+        if "f_accessionno" not in df.columns:
+            messages.error(request, "Missing column: f_accessionno")
             return redirect("upload_antibiotic_entries")
 
-    return render(request, "wgs_app/Add_wgs.html", {
-        "form": form,
-        "antibiotic_form": antibiotic_form,
-        "referred_form": FinalAntibioticUploadForm(),
-    })
+        # ------------------------------------------------
+        # CLEAN NUMERIC VALUES LIKE 0.06, <0.5, >=64
+        # ------------------------------------------------
+        def clean_numeric(val):
+            if pd.isna(val):
+                return None
+            s = str(val).strip()
+
+            # remove operand prefix
+            s = re.sub(r"^(<=|>=|<|>|≤|≥)", "", s).strip()
+
+            try:
+                return round(float(s), 3)
+            except:
+                return None
+
+        # ------------------------------------------------
+        # Extract operand from any messy format
+        # ------------------------------------------------
+        def extract_operand(val):
+            if val is None:
+                return ""
+            s = str(val).strip()
+            for op in ["<=", ">=", "<", ">", "≤", "≥"]:
+                if s.startswith(op):
+                    return op
+            return ""
+
+        # ------------------------------------------------
+        # MAP ACCESSION NUMBERS TO Final_Data
+        # ------------------------------------------------
+        acc_list = df["f_accessionno"].astype(str).str.strip()
+        acc_unique = acc_list.unique()
+
+        ref_map = {
+            r.f_AccessionNo: r
+            for r in Final_Data.objects.filter(f_AccessionNo__in=acc_unique)
+        }
+
+        created = updated = skipped = errors = 0
+        skip_logs = []
+
+        # ==============================================================
+        # MAIN IMPORT LOOP
+        # ==============================================================
+        for idx, row in df.iterrows():
+
+            accession = str(row["f_accessionno"]).strip()
+            ref = ref_map.get(accession)
+
+            if not ref:
+                skipped += 1
+                skip_logs.append(f"Row {idx}: accession not found: {accession}")
+                continue
+
+            # ================================================
+            # PROCESS ALL OTHER COLUMNS
+            # ================================================
+            for col in df.columns:
+
+                if col in ["f_accessionno", "year"]:
+                    continue
+
+                raw = row.get(col)
+                raw_str = "" if pd.isna(raw) else str(raw).strip()
+
+                # Skip empty columns
+                if raw_str == "":
+                    skipped += 1
+                    skip_logs.append(f"Row {idx}, Col {col}: empty -> skipped")
+                    continue
+
+                # Extract RIS separately
+                ris = ""
+                if raw_str.upper() in ["R", "S", "I", "SDD"]:
+                    ris = raw_str.upper()
+
+                # -----------------------------------------------
+                # DETECT MIC or DISK TYPE
+                # -----------------------------------------------
+                is_mic = (
+                    col.endswith("_nm")
+                    or col.endswith("nm")
+                    or "mic" in col
+                ) and not col.endswith("_nm_op")
+
+                is_disk = bool(re.match(r".*_nd[0-9]*$", col))
+
+                if not (is_mic or is_disk):
+                    continue  # skip unknown column format
+
+                # base antibiotic code
+                base = col.split("_")[0].upper()
+
+                # Full antibiotic code:
+                full_code = col.upper()
+
+                # -----------------------------------------------
+                # Operand
+                # -----------------------------------------------
+                operand = extract_operand(raw_str)
+
+                # Clean invalid operands
+                if operand.lower() in ["nan", "none", "null"]:
+                    operand = ""
 
 
-### final antibiotic entries
-# @login_required
-# def show_final_antibiotic(request):
-#     finalantibiotic_summaries = Final_AntibioticEntry.objects.all().order_by("ab_AccessionNo")  # optional ordering
+                # If value contains both operand+value like "<=0.5"
+                numeric_val = clean_numeric(raw_str)
 
-#     total_records = Final_Data.objects.count()
-#      # Paginate the queryset to display 20 records per page
-#     paginator = Paginator(finalantibiotic_summaries, 20)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
+                # -----------------------------------------------
+                # Extra OP column detection
+                # -----------------------------------------------
+                op_col1 = f"{col}_op"
+                op_col2 = f"{base.lower()}_mic_op"
 
-#     # Render the template with paginated data
-#     return render(
-#         request,
-#         "wgs_app/show_final_antibiotic.html",
-#         {"page_obj": page_obj,
-#          "total_records": total_records,
-#          },  # only send page_obj
-#     )
+                for op_col in [op_col1, op_col2]:
+                    if op_col in df.columns:
+                        raw_op = row.get(op_col)
+                        if raw_op not in [None, "", " ", float("nan")]:
+                            operand = str(raw_op).strip()
 
+                # -----------------------------------------------
+                # RIS COLUMN
+                # -----------------------------------------------
+                ris_col = f"{col}_ris"
+                if ris_col in df.columns:
+                    raw_ris = row.get(ris_col)
+                    if raw_ris not in [None, "", " "]:
+                        ris = str(raw_ris).strip().upper()
 
+                # -----------------------------------------------
+                # FINAL CHECK: skip if no useful info
+                # -----------------------------------------------
+                if not numeric_val and operand == "" and ris == "":
+                    skipped += 1
+                    skip_logs.append(f"Row {idx}, Col {col}: no numeric/operand/ris -> skipped (raw='{raw_str}')")
+                    continue
 
+                # -----------------------------------------------
+                # Build DB object fields
+                # -----------------------------------------------
+                entry_data = {
+                    "ab_Abx": base,
+                    "ab_Abx_code": full_code,
+                    "ab_AccessionNo": accession,
+                    "ab_MIC_value": numeric_val if is_mic else None,
+                    "ab_Disk_value": numeric_val if is_disk else None,
+                    "ab_MIC_operand": operand if is_mic else "",
+                    "ab_MIC_enRIS": ris if is_mic else "",
+                    "ab_Disk_enRIS": ris if is_disk else "",
+                }
 
-@login_required(login_url="/login/")
-def show_final_antibiotic(request):
-    entries = Final_AntibioticEntry.objects.filter(ab_Retest_Abx_code__isnull=True)
-    abx_data = {}
-    abx_codes = set()
+                # -----------------------------------------------
+                # SAVE TO DATABASE
+                # -----------------------------------------------
+                try:
+                    obj, created_flag = Final_AntibioticEntry.objects.update_or_create(
+                        ab_idNum_f_referred=ref,
+                        ab_Abx_code=full_code,
+                        defaults=entry_data,
+                    )
+                    if created_flag:
+                        created += 1
+                    else:
+                        updated += 1
 
-    for entry in entries:
-        accession_no = entry.ab_AccessionNo
-        abx_code = entry.ab_Abx_code  # Only ordinary antibiotic (excluding retest antibiotics)
+                except Exception as e:
+                    errors += 1
+                    print(f"[ERROR] Row {idx}, Col {col}: {e}")
 
-        # Get all values and interpretations for ordinary antibiotics
-        value = entry.ab_Disk_value or entry.ab_MIC_value
-        RIS = entry.ab_Disk_RIS or entry.ab_MIC_RIS
-        Operand = entry.ab_MIC_operand or None
+        # ==============================================================
+        # FINISHED
+        # ==============================================================
 
-        if accession_no not in abx_data:
-            abx_data[accession_no] = {}
+        print("Upload summary:",
+              f"Created: {created}",
+              f"Updated: {updated}",
+              f"Skipped: {skipped}",
+              f"Errors: {errors}")
 
-        # Store only **ordinary** antibiotic values
-        if abx_code:  
-            abx_data[accession_no][abx_code] = {'value': value, 'RIS': RIS, 'Operand': Operand}
-            abx_codes.add(abx_code)  # Add only ordinary antibiotics
+        print("Skip logs (first 50):")
+        for log in skip_logs[:50]:
+            print(" ", log)
 
-    context = {
-        'abx_data': abx_data,
-        'abx_codes': sorted(abx_codes),  # Sorted list of ordinary antibiotics
-    }
-    
-    return render(request, 'wgs_app/show_final_antibiotic.html', context)
+        messages.success(
+            request,
+            f"Created: {created}, Updated: {updated}, Skipped: {skipped}, Errors: {errors}"
+        )
+        return redirect("show_final_antibiotic")
+
+    except Exception as e:
+        transaction.set_rollback(True)
+        messages.error(request, f"Fatal Error: {str(e)}")
+        return redirect("show_final_antibiotic")
+
 
 
 
 @login_required
+def show_final_antibiotic(request):
+
+    entries = Final_AntibioticEntry.objects.select_related(
+        "ab_idNum_f_referred"
+    ).order_by("ab_idNum_f_referred__f_AccessionNo")
+
+    abx_data = {}
+    abx_columns = set()
+
+    for entry in entries:
+
+        acc = entry.ab_idNum_f_referred.f_AccessionNo
+        full_code = entry.ab_Abx_code.upper()     # e.g., AMK_NM or AMK_ND30
+
+        # Determine MIC vs DISK
+        is_mic = full_code.endswith("_NM")
+        is_disk = "ND" in full_code
+
+        # Build final column identifiers
+        col_value = full_code
+        col_op    = f"{full_code}_OP"
+        col_ris   = f"{full_code}_RIS"
+
+        # Register columns for header
+        abx_columns.update([col_value, col_op, col_ris])
+
+        # Ensure accession dict exists
+        if acc not in abx_data:
+            abx_data[acc] = {"item_id": entry.id}
+
+        # Assign numeric value
+        abx_data[acc][col_value] = (
+            entry.ab_MIC_value if is_mic else entry.ab_Disk_value
+        ) or ""
+
+        # Assign operand
+        abx_data[acc][col_op] = (
+            entry.ab_MIC_operand if is_mic else ""
+        ) or ""
+
+        # Assign RIS
+        abx_data[acc][col_ris] = (
+            entry.ab_MIC_enRIS if is_mic else entry.ab_Disk_enRIS
+        ) or ""
+
+    # Sort antibiotic columns alphabetically
+    abx_columns = sorted(abx_columns)
+
+    # Convert dictionary to list ONLY for pagination
+    paginated_list = list(abx_data.items())   # → [ (acc, dict), ... ]
+
+    # Pagination
+    paginator = Paginator(paginated_list, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Debug output
+    print("COLUMNS:", abx_columns[:20])
+    print("FIRST ROW:", page_obj.object_list[0] if page_obj.object_list else "NO DATA")
+
+    return render(
+        request,
+        "wgs_app/show_final_antibiotic.html",
+        {
+            "page_obj": page_obj,
+            "abx_data": dict(page_obj.object_list),   # <-- FIXED!!! DICT RESTORED
+            "abx_codes": abx_columns,
+            "total_records": len(entries),
+        }
+    )
+
+
+
 def delete_final_antibiotic(request, pk):
-    final_antibiotic_item = get_object_or_404(Final_AntibioticEntry, pk=pk)
+    target = get_object_or_404(Final_AntibioticEntry, pk=pk)
+    acc = target.ab_idNum_f_referred.f_AccessionNo
 
     if request.method == "POST":
-        final_antibiotic_item.delete()
-        messages.success(request, f"Record {final_antibiotic_item.ab_AccessionNo} deleted successfully!")
-        return redirect('show_final_antibiotic')  # <-- Correct URL name
+        Final_AntibioticEntry.objects.filter(
+            ab_idNum_f_referred__f_AccessionNo=acc
+        ).delete()
+        messages.success(request, f"All records for accession {acc} deleted successfully!")
+        return redirect('show_final_antibiotic')
 
-    messages.error(request, "Invalid request for deletion.")
-    return redirect('show_final_antibiotic')  # <-- Correct URL name
 
 
 @login_required

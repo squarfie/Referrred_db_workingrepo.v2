@@ -424,7 +424,6 @@ label.form-control-label{
                 <thead class="thead-light">
                   <tr style="line-height: 15px;">
                     <th>ANTIBIOTIC</th>
-                    <th>TEST METHOD</th>
                     <th>WHONET CODE</th>
                     <th>TEST RESULT</th>
                     <th>RIS</th>
@@ -436,7 +435,6 @@ label.form-control-label{
                       {% if entry.Disk_Abx %}
                         <tr>
                           <td>{{ entry.Antibiotic }}</td>
-                          <td>Disk</td>
                           <td>{{ entry.Whonet_Abx }}</td>
                           <td>
                             <input name="disk_{{ entry.Whonet_Abx }}" 
@@ -471,7 +469,6 @@ label.form-control-label{
                 <thead class="thead-light">
                   <tr style="line-height: 15px;">
                     <th>ANTIBIOTIC</th>
-                    <th>TEST METHOD</th>
                     <th>WHONET CODE</th>
                     <th>OPERAND</th>
                     <th>TEST RESULT</th>
@@ -485,7 +482,6 @@ label.form-control-label{
                       {% if not entry.Disk_Abx %}
                         <tr>
                           <td>{{ entry.Antibiotic }}</td>
-                          <td>MIC</td>
                           <td>{{ entry.Whonet_Abx }}</td>
                           <td>
                             <input type="text" name="mic_operand_{{ entry.Whonet_Abx }}"
@@ -651,7 +647,6 @@ label.form-control-label{
               <thead class="thead-light">
                 <tr style="line-height: 15px;">
                   <th scope="col">ANTIBIOTIC</th>
-                  <th scope="col">TEST METHOD</th>
                   <th scope="col">WHONET CODE</th>
                   <th scope="col">TEST RESULT</th>
                   <th scope="col">RIS</th>
@@ -663,7 +658,6 @@ label.form-control-label{
                     {% if retest.Disk_Abx %}
                       <tr>
                         <td>{{ retest.Antibiotic }}</td>
-                        <td>Disk</td>
                         <td>{{ retest.Whonet_Abx }}</td>
                         <td>
                           <input name="retest_disk_{{ retest.Whonet_Abx }}" 
@@ -698,7 +692,6 @@ label.form-control-label{
               <thead class="thead-light">
                 <tr style="line-height: 15px;">
                   <th scope="col">ANTIBIOTIC</th>
-                  <th scope="col">TEST METHOD</th>
                   <th scope="col">WHONET CODE</th>
                   <th scope="col">OPERAND</th>
                   <th scope="col">TEST RESULT</th>
@@ -712,7 +705,6 @@ label.form-control-label{
                     {% if not retest.Disk_Abx %}
                       <tr>
                         <td>{{ retest.Antibiotic }}</td>
-                        <td>MIC</td>
                         <td>{{ retest.Whonet_Abx }}</td>
                         <td>
                           <input name="retest_mic_operand_{{ retest.Whonet_Abx }}" 

@@ -183,21 +183,21 @@ class Final_AntibioticEntry(models.Model):
 #  links to main and breakpoints table
     
     ab_idNum_f_referred = models.ForeignKey(Final_Data, on_delete=models.CASCADE, null=True, related_name='final_entries', to_field='f_AccessionNo')
-    ab_AccessionNo= models.CharField(max_length=100, blank=True, null=True)
+    ab_AccessionNo= models.CharField(max_length=30, blank=True, null=True)
     ab_RefNo = models.CharField(max_length=100, blank=True, null=True)
     ab_breakpoints_id = models.ManyToManyField('home.BreakpointsTable', max_length=6)
     
     ab_Antibiotic = models.CharField(max_length=255, blank=True, null=True)
-    ab_Abx_code= models.CharField(max_length=100, blank=True, null=True)
+    ab_Abx_code= models.CharField(max_length=10, blank=True, null=True)
     ab_Abx=models.CharField(max_length=100, blank=True, null=True)
 
     #sentinel site results
-    ab_Disk_value = models.IntegerField(blank=True, null=True)
+    ab_Disk_value = models.PositiveSmallIntegerField(null=True, blank=True)
     ab_Disk_RIS = models.CharField(max_length=4, blank=True) 
     ab_Disk_enRIS = models.CharField(max_length=4, blank=True, default='') 
     
     ab_MIC_operand=models.CharField(max_length=4, blank=True, null=True, default='')
-    ab_MIC_value = models.DecimalField(max_digits=5, decimal_places=3, blank=True, null=True)
+    ab_MIC_value = models.DecimalField(max_digits=7, decimal_places=3, blank=True, null=True)
     ab_MIC_RIS = models.CharField(max_length=4, blank=True)
     ab_MIC_enRIS = models.CharField(max_length=4, blank=True, default='')
     

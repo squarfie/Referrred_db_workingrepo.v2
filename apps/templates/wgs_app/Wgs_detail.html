@@ -15,10 +15,18 @@
           <h6 class="section-title mb-2">
             <i class="ni ni-badge mr-2" style="color: #5e72e4;"></i>Identification
           </h6>
+          <div class="row">
+            <div class="col-6">
           <div class="info-item mb-2">
             <label>Accession No:</label>
             <p class="info-value font-weight-bold" style="color: #5e72e4;">{{ entry.accession }}</p>
-          </div>
+          </div></div>
+          <div class="col-6">
+          <div class="info-item mb-2">
+                <label>Referring Lab:</label>
+                <p class="info-value small">{{ entry.sitecode|default:"N/A" }}</p>
+          </div></div>
+        </div>
           <div class="row">
             <div class="col-6">
               <div class="info-item mb-0">
@@ -55,6 +63,8 @@
               </div>
             </div>
           </div>
+          <div class="row">
+            <div class="col-6">
           <div class="info-item mb-0">
             <label>Growth:</label>
             <p class="info-value">
@@ -65,6 +75,16 @@
               {% endif %}
             </p>
           </div>
+          </div>
+              <div class="col-6">
+              <div class="info-item mb-2">
+                <label>Organism:</label>
+                <p class="info-value font-weight-bold small" style="color: #fb6340;">
+                  {{ entry.organism|default:"N/A" }}
+                </p>
+              </div>
+            </div>
+              </div>
         </div>
       </div>
     </div>
@@ -116,45 +136,49 @@
       <div class="col-lg-6">
         <div class="info-section" style="border-left-color: #fb6340;">
           <h6 class="section-title mb-2">
-            <i class="ni ni-chart-pie-35 mr-2" style="color: #fb6340;"></i>Clinical Findings
+            <i class="ni ni-chart-pie-35 mr-2" style="color: #fb6340;"></i>Antibiotic Results
           </h6>
-          <div class="info-item mb-2">
-            <label>Organism:</label>
-            <p class="info-value font-weight-bold small" style="color: #fb6340;">
-              {{ entry.organism|default:"N/A" }}
-            </p>
-          </div>
-          <div class="row">
-            <div class="col-6">
-              <div class="info-item mb-2">
-                <label>Referring Lab:</label>
-                <p class="info-value small">{{ entry.sitecode|default:"N/A" }}</p>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="info-item mb-0">
-                {% if entry.antibiotics %}
-                <div class="antibiotic-grid">
-                  {% for abx in entry.antibiotics %}
+
+          <div class="info-item mb-0" >
+            {% if entry.antibiotics %}
+              <label style="margin-bottom: 0.75rem;">Antibiotics:</label>
+              <div class="antibiotic-grid">
+                {% for abx in entry.antibiotics %}
                     <div class="antibiotic-item">
                       <span class="abx-code">{{ abx.code }}</span>
+
+                      {% with value=abx.disk|default:abx.mic %}
+                      {% with ris=abx.d_ris|default:abx.m_ris %}
+
                       <span class="abx-result badge badge-sm
-                        {% if abx.ris|upper == 'R' %}badge-danger
-                        {% elif abx.ris|upper == 'S' %}badge-success
-                        {% elif abx.ris|upper == 'I' %}badge-warning
-                        {% else %}badge-secondary{% endif %}">
-                        {{ abx.ris|default:abx.disk|default:abx.mic|default:"N/A" }}
+                        {% if ris == 'R' %}badge-danger
+                        {% elif ris == 'S' %}badge-success
+                        {% elif ris == 'I' %}badge-warning
+                        {% elif ris == 'SDD' %}badge-info
+                        {% else %}badge-secondary{% endif %}
+                      ">
+                          {# Show operand if exists and valid #}
+                          {% if abx.m_op and abx.m_op|lower != 'nan' %}
+                            {{ abx.m_op }}{{ value }}
+                          {% else %}
+                            {{ value }}
+                          {% endif %}
+
+                          {# ADD RIS LETTER NEXT TO VALUE #}
+                          {% if ris %}&nbsp;<strong>{{ ris }}</strong>{% endif %}
                       </span>
+
+                      {% endwith %}
+                      {% endwith %}
                     </div>
-                  {% endfor %}
-                </div>
-                {% else %}
-                <div class="alert alert-secondary small mb-0">
-                  <i class="ni ni-notification-70"></i> No antibiotic data available.
-                </div>
-                {% endif %}
+
+                {% endfor %}
               </div>
-            </div>
+            {% else %}
+              <div class="alert alert-secondary small mb-0">
+                <i class="ni ni-notification-70"></i> No antibiotic data available.
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -473,28 +497,36 @@
   font-weight: 500;
 }
 
-/* Antibiotic grid */
+/* Antibiotic grid - FIXED */
 .antibiotic-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .antibiotic-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  font-size: 7px;
 }
 
 .abx-code {
   font-size: 0.875rem;
   font-weight: 600;
   color: #32325d;
+  white-space: nowrap;
 }
 
 .abx-result {
   font-size: 0.75rem;
-  width: fit-content;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Responsive */
@@ -508,7 +540,11 @@
   }
 
   .antibiotic-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .antibiotic-item {
+    width: 100%;
   }
 }
 </style>

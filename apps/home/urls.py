@@ -72,6 +72,7 @@ urlpatterns = [
     path('delete_all_dropdown/', views.delete_all_dropdown, name='delete_all_dropdown'),
 
     path("copy_to_final/<int:id>/", views.copy_data_to_final, name="copy_data_to_final"),
+    path("undo_copy/<int:id>/", views.undo_copy_to_final, name="undo_copy_to_final"),
     path("upload_raw/", views.upload_combined_table, name='upload_combined_table'),
     path("field-mapper-tool/", views.field_mapper_tool, name="field_mapper_tool"),
     path("generate-mapped-excel/", views.generate_mapped_excel, name="generate_mapped_excel"),
