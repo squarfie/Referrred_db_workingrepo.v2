@@ -370,3 +370,16 @@ class Antibiotics_uploadForm(forms.ModelForm):
      class Meta:
           model = Antibiotic_upload
           fields = ['File_uploadAbx']
+
+
+
+class OrganismForm(forms.ModelForm):
+     class Meta:
+          model = Organism_List
+          fields = '__all__'
+
+
+class Organism_uploadForm(forms.ModelForm):
+     class Meta:
+          model = Organism_upload
+          fields =['File_uploadOrg']

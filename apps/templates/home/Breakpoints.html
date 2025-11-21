@@ -189,6 +189,7 @@
           </div>
         </div>
 
+
         <!-- Guidelines and Test Method -->
         <div class="section-divider">
           <h5 class="mb-0" style="color: #1a7a8e;">
@@ -196,7 +197,7 @@
           </h5>
         </div>
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="form-group">
               <label class="form-control-label" for="Guidelines">
                 <i class="fas fa-clipboard-list mr-1"></i>Guidelines
@@ -211,7 +212,15 @@
               </select>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label class="form-control-label" for="Year">
+                <i class="fas fa-calendar-alt mr-1"></i>Year
+              </label>
+              <input id="Year" class="form-control" value="{{breakpoint.Year}}" type="text" name="Year" placeholder="e.g. 2024"/>
+            </div>
+          </div>
+          <div class="col-md-4">
             <div class="form-group">
               <label class="form-control-label" for="Test_Method">
                 <i class="fas fa-vial mr-1"></i>Test Method
@@ -227,6 +236,32 @@
             </div>
           </div>
         </div>
+
+        <!-- Antibiotic Information -->
+          <div class="section-divider">
+          <h5 class="mb-0" style="color: #1a7a8e;">
+            <i class="fas fa-pills mr-2"></i>Organism Assignment
+          </h5> 
+        </div>
+          <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-control-label" for="Org">
+                <i class="fa fa-bug mr-2"></i>Organism Code
+              </label>
+              <input id="Org" class="form-control" value="{{breakpoint.Org}}" type="text" name="Org" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="form-control-label" for="Org_Grp">
+                <i class="fa fa-tree mr-2" ></i>Organism Group
+              </label>
+              <input id="Org_Grp" class="form-control" value="{{breakpoint.Org_Grp}}" type="text" name="Org_Grp" />
+            </div>
+          </div>
+        </div>
+
 
         <!-- Antibiotic Information -->
         <div class="section-divider">

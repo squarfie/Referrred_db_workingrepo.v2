@@ -278,6 +278,13 @@ class TATprocess(models.Model):
         db_table ="TATprocess"
 
 
+class TATexclusion(models.Model):
+     Date_Excluded = models.DateField(blank=True, null=True)
+     Exclusion_Details = models.CharField(max_length=255, blank=True)
+
+     class Meta:
+         db_table = "Date_Excluded"
+
 class TATUpload(models.Model):
     file = models.FileField(upload_to='uploads/TAT/', null=True, blank=True)
 
@@ -331,6 +338,7 @@ class BreakpointsTable(models.Model):
     )
     Guidelines = models.CharField(max_length=100, choices=GuidelineChoices, blank=True, default='')
     Year = models.CharField(max_length=100, blank=True, default='')
+    Org_Grp = models.CharField(max_length=100, blank=True, default='')
     Org = models.CharField(max_length=100, blank=True, default='')
     Test_Method = models.CharField(max_length=20, choices=TestMethodChoices, blank=True, default='')
     Potency = models.CharField(max_length=20, blank=True, default='')
@@ -506,3 +514,33 @@ class Antibiotic_upload(models.Model):
     class Meta:
         db_table = "Antibiotic_upload"
 
+
+
+
+class Organism_List(models.Model):
+    Whonet_Org_Code = models.CharField(max_length=20, unique=True)
+    Replaced_by = models.CharField(max_length=20, null=True, blank=True)
+    Organism = models.CharField(max_length=255)
+    Organism_Type = models.CharField(max_length=5, null=True, blank=True)
+    Subkingdom_Code = models.CharField(max_length=10, null=True, blank=True)
+    Family_Code = models.CharField(max_length=20, null=True, blank=True)
+    Genus_Group = models.CharField(max_length=50, null=True, blank=True)
+    Genus_Code = models.CharField(max_length=20, null=True, blank=True)
+    Species_Group = models.CharField(max_length=50, null=True, blank=True)
+    Serovar_Group = models.CharField(max_length=50, null=True, blank=True)
+    Kingdom = models.CharField(max_length=100, null=True, blank=True)
+    Phylum = models.CharField(max_length=100, null=True, blank=True)
+    Class = models.CharField(max_length=100, null=True, blank=True)
+    Order = models.CharField(max_length=100, null=True, blank=True)
+    Family= models.CharField(max_length=100, null=True, blank=True)
+    Genus = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.Whonet_Org_Code} - {self.Organism}"
+
+
+class Organism_upload(models.Model):
+    File_uploadOrg = models.FileField(upload_to='uploads/organism/', null=True, blank=True)
+
+    class Meta:
+        db_table = "Organism_upload"
