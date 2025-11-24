@@ -683,141 +683,6 @@ def delete_record_in_batch(request, id):
 #     })
 
 
-############### Raw data view (optimized version)
-# @login_required(login_url="/login/")
-# def raw_data(request, id):
-#     # --- Get all antibiotics (from Antibiotic_List) ---
-#     antibiotics_main = Antibiotic_List.objects.filter(Show=True)
-#     antibiotics_retest = Antibiotic_List.objects.filter(Retest=True)
-
-#     # --- Get the isolate record ---
-#     isolates = get_object_or_404(Referred_Data, pk=id)
-
-#     # --- Fetch entries ---
-#     all_entries = AntibioticEntry.objects.filter(ab_idNum_referred=isolates)
-#     existing_entries = all_entries.filter(ab_Abx_code__isnull=False)
-#     retest_entries = all_entries.filter(ab_Retest_Abx_code__isnull=False)
-
-#     # --- Handle GET ---
-#     if request.method == "GET":
-#         form = Referred_Form(instance=isolates)
-#         return render(request, "home/Referred_form.html", {
-#             "form": form,
-#             "antibiotics_main": antibiotics_main,
-#             "antibiotics_retest": antibiotics_retest,
-#             "edit_mode": True,
-#             "isolates": isolates,
-#             "existing_entries": existing_entries,
-#             "retest_entries": retest_entries,
-#         })
-
-#     # --- Handle POST ---
-#     elif request.method == "POST":
-#         form = Referred_Form(request.POST, instance=isolates)
-
-#         if form.is_valid():
-#             isolates = form.save(commit=False)
-#             isolates.save()
-
-#             organism_code = isolates.ars_OrgCode  # or whatever field holds org
-#             print(f"Organism code detected: {organism_code}")
-
-#             # --- Handle main antibiotics ---
-#             for abx in antibiotics_main:
-#                 abx_code = abx.Whonet_Abx.strip().upper()
-
-#                 # find correct breakpoint row for this organism + antibiotic
-#                 bp = BreakpointsTable.objects.filter(
-#                     Whonet_Abx=abx_code,
-#                     Org__iexact=organism_code # assuming exact match; adjust as needed
-#                 ).first()
-
-#                 disk_value = request.POST.get(f"disk_{abx_code}") or ""
-#                 mic_value = request.POST.get(f"mic_{abx_code}") or ""
-#                 disk_enris = (request.POST.get(f"disk_enris_{abx_code}") or "").strip()
-#                 mic_enris = (request.POST.get(f"mic_enris_{abx_code}") or "").strip()
-#                 mic_operand = (request.POST.get(f"mic_operand_{abx_code}") or "").strip()
-#                 alert_mic = f"alert_mic_{abx_code}" in request.POST
-
-#                 # create/update antibiotic entry
-#                 antibiotic_entry, created = AntibioticEntry.objects.update_or_create(
-#                     ab_idNum_referred=isolates,
-#                     ab_Abx_code=abx_code,
-#                     defaults={
-#                         "ab_AccessionNo": isolates.AccessionNo,
-#                         "ab_Antibiotic": abx.Antibiotic,
-#                         "ab_Abx": abx.Abx_Code,
-#                         "ab_Disk_value": disk_value or None,
-#                         "ab_Disk_enRIS": disk_enris,
-#                         "ab_MIC_value": mic_value or None,
-#                         "ab_MIC_enRIS": mic_enris,
-#                         "ab_MIC_operand": mic_operand,
-#                         "ab_R_breakpoint": bp.R_val if bp else None,
-#                         "ab_I_breakpoint": bp.I_val if bp else None,
-#                         "ab_SDD_breakpoint": bp.SDD_val if bp else None,
-#                         "ab_S_breakpoint": bp.S_val if bp else None,
-#                         "ab_AlertMIC": alert_mic,
-#                         "ab_Alert_val": bp.Alert_val if alert_mic and bp else "",
-#                     }
-#                 )
-
-#                 if bp:
-#                     antibiotic_entry.ab_breakpoints_id.set([bp])
-
-#             # --- Handle retest antibiotics ---
-#             for abx in antibiotics_retest:
-#                 abx_code = abx.Whonet_Abx.strip().upper()
-
-#                 bp_retest = BreakpointsTable.objects.filter(
-#                     Whonet_Abx=abx_code,
-#                     Org__iexact=organism_code
-#                 ).first()
-
-#                 retest_mic_value = request.POST.get(f"retest_mic_{abx_code}") or ""
-#                 retest_mic_enris = request.POST.get(f"retest_mic_enris_{abx_code}") or ""
-#                 retest_mic_operand = request.POST.get(f"retest_mic_operand_{abx_code}") or ""
-#                 retest_alert_mic = f"retest_alert_mic_{abx_code}" in request.POST
-
-#                 retest_entry, created = AntibioticEntry.objects.update_or_create(
-#                     ab_idNum_referred=isolates,
-#                     ab_Retest_Abx_code=abx_code,
-#                     defaults={
-#                         "ab_Retest_MICValue": retest_mic_value or None,
-#                         "ab_Retest_MIC_enRIS": retest_mic_enris,
-#                         "ab_Retest_MIC_operand": retest_mic_operand,
-#                         "ab_Retest_Antibiotic": abx.Antibiotic,
-#                         "ab_Retest_Abx": abx.Abx_Code,
-#                         "ab_Ret_R_breakpoint": bp_retest.R_val if bp_retest else None,
-#                         "ab_Ret_S_breakpoint": bp_retest.S_val if bp_retest else None,
-#                         "ab_Ret_SDD_breakpoint": bp_retest.SDD_val if bp_retest else None,
-#                         "ab_Ret_I_breakpoint": bp_retest.I_val if bp_retest else None,
-#                         "ab_Retest_AlertMIC": retest_alert_mic,
-#                         "ab_Retest_Alert_val": bp_retest.Alert_val if retest_alert_mic and bp_retest else "",
-#                     }
-#                 )
-
-#                 if bp_retest:
-#                     retest_entry.ab_breakpoints_id.set([bp_retest])
-
-#             messages.success(request, "Data saved successfully.")
-#             return redirect("show_data")
-#         else:
-#             messages.error(request, "Error: Saving unsuccessful")
-#             print(form.errors)
-
-#     # fallback
-#     form = Referred_Form(instance=isolates)
-#     return render(request, "home/Referred_form.html", {
-#         "form": form,
-#         "antibiotics_main": antibiotics_main,
-#         "antibiotics_retest": antibiotics_retest,
-#         "edit_mode": True,
-#         "isolates": isolates,
-#         "existing_entries": existing_entries,
-#         "retest_entries": retest_entries,
-#     })
-
-
 
 ################ Raw data view (final version with dynamic breakpoints)
 
@@ -912,6 +777,62 @@ def raw_data(request, id):
                             Org=""
                         )
                     ).first()
+
+
+                # --- Filter antibiotics by organism + breakpoint availability ---
+                if breakpoint_year and site_org:
+                    # Normalize organism text
+                    org_filter = site_org.strip().lower()
+
+                    bp_main = (
+                        BreakpointsTable.objects.filter(
+                            Year=breakpoint_year,
+                            Org__iexact=org_filter
+                        )
+                    )
+
+                    # fallback: org blank
+                    if not bp_main.exists():
+                        bp_main = BreakpointsTable.objects.filter(
+                            Year=breakpoint_year
+                        ).filter(models.Q(Org="") | models.Q(Org__isnull=True))
+
+                    # Extract WHONET codes from breakpoint table
+                    bp_main_whonet = list(bp_main.values_list("Whonet_Abx", flat=True))
+
+                    antibiotics_main = Antibiotic_List.objects.filter(
+                        Show=True,
+                        Whonet_Abx__in=bp_main_whonet
+                    )
+                else:
+                    # fallback if no year or site_org yet
+                    antibiotics_main = Antibiotic_List.objects.filter(Show=True)
+
+
+                ############# --- For retest antibiotics (use ARS organism code) ---
+                if breakpoint_year and ars_org:
+                    org_filter_retest = ars_org.strip().lower()
+
+                    bp_retest = BreakpointsTable.objects.filter(
+                        Year=breakpoint_year,
+                        Org__iexact=org_filter_retest
+                    )
+
+                    # fallback
+                    if not bp_retest.exists():
+                        bp_retest = BreakpointsTable.objects.filter(
+                            Year=breakpoint_year
+                        ).filter(models.Q(Org="") | models.Q(Org__isnull=True))
+
+                    bp_retest_whonet = list(bp_retest.values_list("Whonet_Abx", flat=True))
+
+                    antibiotics_retest = Antibiotic_List.objects.filter(
+                        Retest=True,
+                        Whonet_Abx__in=bp_retest_whonet
+                    )
+                else:
+                    antibiotics_retest = Antibiotic_List.objects.filter(Retest=True)
+                ############# END 
 
                 disk_value = request.POST.get(f"disk_{abx_code}") or ""
                 mic_value = request.POST.get(f"mic_{abx_code}") or ""
@@ -1015,6 +936,75 @@ def raw_data(request, id):
         "breakpoint_year": breakpoint_year,
         "edit_mode": True,
     })
+
+#############################  
+@login_required(login_url="/login/")
+def reload_antibiotics(request):
+    site_org = request.GET.get("site_org", "").strip().lower()
+    ars_orgcode = request.GET.get("ars_orgcode", "").strip().lower()
+    specimen_date = request.GET.get("specimen_date", "")
+
+
+    try:
+        specimen_year = int(specimen_date.split("-")[0])
+    except:
+        specimen_year = None
+
+  
+    if specimen_year:
+        breakpoint_year = (
+            BreakpointsTable.objects.filter(Year__lte=specimen_year)
+            .order_by("-Year")
+            .values_list("Year", flat=True)
+            .first()
+        )
+    else:
+        breakpoint_year = (
+            BreakpointsTable.objects.all()
+            .order_by("-Year")
+            .values_list("Year", flat=True)
+            .first()
+        )
+
+    # ---- Filter Main Antibiotics (Site_Org) ----
+    main_abx = BreakpointsTable.objects.filter(
+        Year=breakpoint_year
+    ).filter(
+        Q(Org__iexact=site_org) | Q(Org="") | Q(Org__isnull=True)
+    ).values_list("Whonet_Abx", flat=True).distinct()
+
+    antibiotics_main = Antibiotic_List.objects.filter(
+        Show=True,
+        Whonet_Abx__in=main_abx
+    )
+
+    # ---- Filter Retest Antibiotics (ARS_OrgCode) ----
+    retest_abx = BreakpointsTable.objects.filter(
+        Year=breakpoint_year
+    ).filter(
+        Q(Org__iexact=ars_orgcode) | Q(Org="") | Q(Org__isnull=True)
+    ).values_list("Whonet_Abx", flat=True).distinct()
+
+    antibiotics_retest = Antibiotic_List.objects.filter(
+        Retest=True,
+        Whonet_Abx__in=retest_abx
+    )
+
+    # ---- Render partial HTML ----
+    main_html = render_to_string("partials/main_antibiotics.html", {
+        "antibiotics_main": antibiotics_main
+    })
+
+    retest_html = render_to_string("partials/retest_antibiotics.html", {
+        "antibiotics_retest": antibiotics_retest
+    })
+
+    return JsonResponse({
+        "main_html": main_html,
+        "retest_html": retest_html
+    })
+
+
 
 ################ Reload antibiotics view (dynamically)
 @login_required(login_url="/login/")
@@ -3988,15 +3978,25 @@ def upload_organisms(request):
     })
 
 
-@login_required
+
+@login_required(login_url="/login/")
 def get_organism_name(request):
-    code = request.GET.get('code')
+    org_code = request.GET.get("org_code")
+    field_key = request.GET.get("field_key")
 
-    if not code:
-        return JsonResponse({"error": "Missing code"}, status=400)
+    if not org_code or not field_key:
+        return JsonResponse({"error": "Missing parameters"}, status=400)
 
-    try:
-        org = Organism_List.objects.get(Whonet_Org_Code=code)
-        return JsonResponse({"organism": org.Organism})
-    except Organism_List.DoesNotExist:
-        return JsonResponse({"organism": ""})
+    org = Organism_List.objects.filter(
+        Whonet_Org_Code=org_code
+    ).values().first()
+
+    if not org:
+        return JsonResponse({"error": "Organism not found"}, status=404)
+
+    if field_key not in org:
+        return JsonResponse({"error": "Invalid field_key"}, status=400)
+
+    return JsonResponse({field_key: org[field_key]})
+
+

@@ -122,7 +122,7 @@ class Referred_Form(forms.ModelForm):
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.fields['Site_Org'].queryset = Organism_List.objects.all() # Always load the latest Site Code
+           
             self.fields['SiteCode'].widget.attrs['readonly'] = True
             self.fields['Batch_Code'].widget.attrs['readonly'] = True
             self.fields['AccessionNo'].widget.attrs['readonly'] = True
@@ -142,10 +142,12 @@ class Referred_Form(forms.ModelForm):
             self.fields['arsp_Ver_Lic'].widget.attrs['readonly'] = True  
             self.fields['arsp_Lab_Lic'].widget.attrs['readonly'] = True  
             self.fields['arsp_Head_Lic'].widget.attrs['readonly'] = True
+            self.fields['Site_Org'].queryset = Organism_List.objects.all() # Always load the latest Site Code
             self.fields['Site_Org'].label_from_instance = lambda obj: obj.Whonet_Org_Code
             self.fields['Site_OrgName'].label_from_instance = lambda obj: obj.Organism
         
-            
+        
+
 #for batch table
 class BatchTable_form(forms.ModelForm):
         bat_SiteCode = forms.ModelChoiceField(

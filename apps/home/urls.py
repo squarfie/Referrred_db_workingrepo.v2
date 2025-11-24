@@ -51,7 +51,8 @@ urlpatterns = [
     path('organism-delete/<int:id>', views.del_organism, name='del_organism'),
     path('organism-delete-all/', views.del_all_organism, name='del_all_organism'),
     path('organism-upload/', views.upload_organisms, name='upload_organisms'),
-    path("/get-organism/", views.get_organism_name, name="ajax_get_organism"),
+    path("get_organism_name/", views.get_organism_name, name="get_organism_name"),
+
 
 
     path('test_results-view/', views.abxentry_view, name='abxentry_view'),

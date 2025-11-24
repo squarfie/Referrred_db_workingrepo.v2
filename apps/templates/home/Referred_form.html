@@ -1103,35 +1103,37 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const siteOrg = document.getElementById("id_Site_Org");         // Code
-    const siteOrgName = document.getElementById("id_Site_OrgName"); // Name
+  document.addEventListener("DOMContentLoaded", function () {
+    const siteOrgSelect = document.getElementById("id_Site_Org");
+    const siteOrgNameInput = document.getElementById("id_Site_OrgName");
 
-    // When CODE changes → update NAME
-    siteOrg.addEventListener("change", function() {
+    if (!siteOrgSelect || !siteOrgNameInput) {
+        console.warn("Organism fields not found.");
+        return;
+    }
 
-        const selectedValue = this.value;  
-        if (!selectedValue) {
-            siteOrgName.value = "";
+    siteOrgSelect.addEventListener("change", function () {
+        const code = this.value;
+
+        if (!code) {
+            siteOrgNameInput.value = "";
             return;
         }
 
-        // Loop through Name dropdown options
-        for (let opt of siteOrgName.options) {
-
-            // Compare using MODEL primary key
-            if (opt.value === selectedValue) {
-                siteOrgName.value = selectedValue;
-                break;
-            }
-        }
+        fetch(`/get_organism_name/?org_code=${encodeURIComponent(code)}&field_key=Organism`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.Organism) {
+                    siteOrgNameInput.value = data.Organism;
+                } else {
+                    siteOrgNameInput.value = "";
+                }
+            })
+            .catch(err => console.error("Organism fetch error:", err));
     });
-
 });
+
 </script>
-
-
 
 {% endblock javascripts %}
