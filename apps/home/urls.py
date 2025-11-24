@@ -33,7 +33,7 @@ urlpatterns = [
     path('breakpoints-add/', views.add_breakpoints, name='add_breakpoints'), 
     path('breakpoints-edit/<int:pk>/', views.add_breakpoints, name='edit_breakpoints'),  
     path('breakpoints-upload/', views.upload_breakpoints, name='upload_breakpoints'),
-    path('breakpoints-deleteAll/', views.delete_all_breakpoints, name='delete_all_breakpoints'),
+    path('breakpoints-delete-all/', views.delete_all_breakpoints, name='delete_all_breakpoints'),
     path('breakpoints-export/', views.export_breakpoints, name='export_breakpoints'),
 
 
@@ -42,8 +42,16 @@ urlpatterns = [
     path('antibiotics-add/', views.add_antibiotics, name='add_antibiotics'), 
     path('antibiotics-edit/<int:pk>/', views.add_antibiotics, name='edit_antibiotics'),  
     path('antibiotics-upload/', views.upload_antibiotics, name='upload_antibiotics'),
-    path('antibiotics-deleteAll/', views.delete_all_antibiotics, name='delete_all_antibiotics'),
+    path('antibiotics-delete-all/', views.delete_all_antibiotics, name='delete_all_antibiotics'),
     path('antibiotics-export/', views.export_antibiotics, name='export_antibiotics'),
+
+    path('organism-add/', views.add_organism, name='add_organism'),
+    path('organism-view/', views.view_organism, name='view_organism'),
+    path('organism-edit/<int:pk>/', views.add_organism, name='edit_organism'),  
+    path('organism-delete/<int:id>', views.del_organism, name='del_organism'),
+    path('organism-delete-all/', views.del_all_organism, name='del_all_organism'),
+    path('organism-upload/', views.upload_organisms, name='upload_organisms'),
+    path("/get-organism/", views.get_organism_name, name="ajax_get_organism"),
 
 
     path('test_results-view/', views.abxentry_view, name='abxentry_view'),

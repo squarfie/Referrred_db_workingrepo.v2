@@ -385,12 +385,12 @@ label.form-control-label{
                             </div>
                                <div class="col-lg-3">
                               <div class="form-group">
-                                <label class='form-control-label' for='OrganismCode'>Organism Code</label> {{form.OrganismCode| append_attr:"class: form-control" }}
+                                <label class='form-control-label' for='Site_Org'>Organism Code</label> {{form.Site_Org| append_attr:"class: form-control" }}
                               </div>
                             </div>
                             <div class="col-lg-3">
                               <div class="form-group">
-                                <label class='form-control-label' for='Site_Org'>Organism Name</label> {{form.Site_Org| append_attr:"class: form-control" }}
+                                <label class='form-control-label' for='Site_OrgName'>Organism Name</label> {{form.Site_OrgName| append_attr:"class: form-control" }}
                               </div>
                             </div>
                          
@@ -1035,6 +1035,9 @@ label.form-control-label{
   });
 </script>
 
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const siteOrgInput = document.querySelector("[name='Site_Org']");
@@ -1100,6 +1103,35 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-  
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const siteOrg = document.getElementById("id_Site_Org");         // Code
+    const siteOrgName = document.getElementById("id_Site_OrgName"); // Name
+
+    // When CODE changes → update NAME
+    siteOrg.addEventListener("change", function() {
+
+        const selectedValue = this.value;  
+        if (!selectedValue) {
+            siteOrgName.value = "";
+            return;
+        }
+
+        // Loop through Name dropdown options
+        for (let opt of siteOrgName.options) {
+
+            // Compare using MODEL primary key
+            if (opt.value === selectedValue) {
+                siteOrgName.value = selectedValue;
+                break;
+            }
+        }
+    });
+
+});
+</script>
+
+
 
 {% endblock javascripts %}

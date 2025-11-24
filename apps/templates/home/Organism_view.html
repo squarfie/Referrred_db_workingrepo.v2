@@ -1,0 +1,385 @@
+{% extends 'layouts/base.html' %}
+{% load custom_filters %}
+{% block title %}Organism Database{% endblock title %}
+
+{% block content %}
+
+<body>
+<div class="header-container pb-6" style="min-height: 180px; position: relative;">
+  <!-- Animated background elements -->
+  <div class="grid-bg"></div>
+
+  <!-- Particles rising -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- Scanning circles -->
+  <div class="scanner"></div>
+  <div class="scanner"></div>
+  <div class="scanner"></div>
+
+  <!-- Glow orbs -->
+  <div class="glow-orb"></div>
+  <div class="glow-orb"></div>
+
+  <!-- Overlay -->
+  <div class="overlay"></div>
+
+<!-- Header Section -->
+  <div class="container-fluid" style="position: relative; z-index: 2;">
+    <div class="header-body">
+      <div class="row align-items-center py-4">
+        <div class="col-lg-6 col-7">
+          <h6 class="h2 text-white d-inline-block mb-0">
+            <i class="fas fa-microscope mr-2"></i>Organisms
+          </h6>
+          <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
+              <li class="breadcrumb-item"><a href="{% url 'batch_create_view' %}">Create Batch</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'add_organism'%}">Organisms</a></li>
+              <li class="breadcrumb-item active" aria-current="page">View All</li>
+            </ol>
+          </nav>
+        </div>
+        <div class="col-lg-6 col-5 text-right">
+          <a class="btn btn-sm btn-neutral" href="{% url 'add_organism'%}">
+            <i class="fas fa-plus mr-1"></i>Add New
+          </a>
+          <button class="btn btn-sm btn-neutral" onclick="history.back()">
+            <i class="fas fa-arrow-left mr-1"></i>Back
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+
+<!-- Main Content -->
+<div class="container-fluid mt--6" style="position: relative; z-index: 3;">
+  <div class="card shadow" style="border-top: 3px solid #2d9cad;">
+    
+    <!-- Card Header -->
+    <div class="card-header border-0" style="background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%);">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h3 class="mb-0" style="color: #1a7a8e;">
+            <i class="fas fa-dna mr-2"></i>Organism List
+          </h3>
+        </div>
+        <div class="col-md-6 text-right">
+          <a href="#" class="btn btn-sm btn-primary">
+            <i class="fas fa-file-export mr-1"></i>Export/Download
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar Section -->
+    <div class="card-body border-bottom" style="background: linear-gradient(to bottom, #f8fcfd 0%, #ffffff 100%);">
+      <!-- Search Bar -->
+      <div class="row align-items-center mb-3">
+        <div class="col-md-12">
+          <div class="input-group" style="box-shadow: 0 2px 8px rgba(29, 156, 173, 0.15); border-radius: 0.5rem; border: 1px solid #d1e8ed;">
+            <div class="input-group-prepend">
+              <span class="input-group-text" style="background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%); border: none; color: #1a7a8e;">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+            <input id="search-input" class="form-control" placeholder="Search by organism name, WHONET code, genus, species, or any field..." type="text" onkeyup="searchTable()" style="border: none; background: white;">
+            <div class="input-group-append">
+              <button class="btn" type="button" onclick="clearSearch()" style="background: #e8f5f7; border: none; color: #1a7a8e;">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Note -->
+      <div class="alert" style="background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%); border-left: 4px solid #2d9cad; border-radius: 0.5rem;">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-info-circle mr-3" style="font-size: 1.5rem; color: #2d9cad;"></i>
+          <div>
+            <strong style="color: #1a7a8e;">Important Note:</strong>
+            <span style="color: #5a6c72;">Configure organism taxonomic classifications and WHONET codes for proper reporting and surveillance data management.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto; overflow-x: auto;">
+      <table class="table table-hover align-items-center table-flush" id="organism-table">
+        <thead class="thead-light" style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%);">
+          <tr>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Actions</th>
+            <th style="min-width: 150px; color: #1a7a8e; font-weight: 600;">WHONET Code</th>
+            <th style="min-width: 180px; color: #1a7a8e; font-weight: 600;">Organism Name</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Type</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Replaced By</th>
+            <th style="min-width: 120px; color: #1a7a8e; font-weight: 600;">Kingdom</th>
+            <th style="min-width: 120px; color: #1a7a8e; font-weight: 600;">Phylum</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Class</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Order</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Family</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Genus Group</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Genus</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Species Group</th>
+            <th style="min-width: 100px; color: #1a7a8e; font-weight: 600;">Serovar Group</th>
+          </tr>
+        </thead>
+        <tbody class="list">
+          {% for organism in page_obj|multi_sort:"Organism,Whonet_Org_Code" %}
+          <tr style="transition: all 0.2s ease;">
+            <td style="white-space: nowrap;">
+              <a href="{% url 'edit_organism' pk=organism.pk %}" class="btn btn-sm mr-1" style="background: linear-gradient(135deg, #7ec97e 0%, #5fb85f 100%); color: white; border: none;" title="Edit">
+                <i class="fa fa-pencil-alt"></i>
+              </a>
+              <a href="#" class="btn btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal" data-url="{% url 'del_organism' organism.id %}" style="background: linear-gradient(135deg, #d97c7c 0%, #c24b4b 100%); color: white; border: none;" title="Delete">
+                <i class="fa fa-trash"></i>
+              </a>
+            </td>
+            <td><strong style="color: #2d9cad;">{{organism.Whonet_Org_Code}}</strong></td>
+            <td><strong style="color: #1a7a8e;">{{organism.Organism}}</strong></td>
+            <td><span style="color: #5a6c72;">{{organism.Organism_Type|default_if_none:""}}</span></td>
+            <td>
+              {% if organism.Replaced_by %}
+                <span class="badge badge-warning">{{organism.Replaced_by}}</span>
+              {% else %}
+                <span class="badge badge-secondary">-</span>
+              {% endif %}
+            </td>
+            <td><span style="color: #5a6c72;">{{organism.Kingdom|default_if_none:""}}</span></td>
+            <td><span style="color: #5a6c72;">{{organism.Phylum|default_if_none:""}}</span></td>
+            <td><span style="color: #5a6c72;">{{organism.Class|default_if_none:""}}</span></td>
+            <td><span style="color: #5a6c72;">{{organism.Order|default_if_none:""}}</span></td>
+            <td><span style="color: #5a6c72;">{{organism.Family_Code|default_if_none:""}}</span></td>
+             <td><span style="color: #5a6c72;">{{organism.Genus_Group|default_if_none:""}}</span></td>
+            <td><strong style="color: #2d9cad;">{{organism.Genus_Code|default_if_none:""}}</strong></td>
+           
+            <td><span style="color: #5a6c72;">{{organism.Species_Group|default_if_none:""}}</span></td>
+            <td><span style="color: #5a6c72;">{{organism.Serovar_Group|default_if_none:""}}</span></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="14" class="text-center py-5">
+              <i class="ni ni-folder-17 text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3 mb-0">No Organisms found</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Card Footer with Pagination -->
+    <div class="card-footer py-4 bg-light">
+      <div class="row align-items-center">
+        <!-- Go To Page Form -->
+        <div class="col-md-4">
+          <form method="get" class="form-inline">
+            <label class="mr-2 mb-0 text-primary">Go to page:</label>
+            <input type="number" name="page"
+                   min="1"
+                   max="{{ page_obj.paginator.num_pages }}"
+                   value="{{ page_obj.number }}"
+                   class="form-control form-control-sm mr-2"
+                   style="width: 70px;">
+            <button type="submit" class="btn btn-sm btn-primary">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Page Info -->
+        <div class="col-md-4 text-center">
+          <span class="text-primary">
+            Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+          </span>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="col-md-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end mb-0">
+              <!-- First Page -->
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1" title="First page">
+                    <i class="fas fa-angle-double-left"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                </li>
+              {% endif %}
+
+              <!-- Previous -->
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}" title="Previous page">
+                    <i class="fas fa-angle-left"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                </li>
+              {% endif %}
+
+              <!-- Page Numbers -->
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                  {% if num == page_obj.number %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ num }}</span>
+                    </li>
+                  {% else %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              <!-- Next -->
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}" title="Next page">
+                    <i class="fas fa-angle-right"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                </li>
+              {% endif %}
+
+              <!-- Last Page -->
+              {% if page_obj.number < page_obj.paginator.num_pages %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Last page">
+                    <i class="fas fa-angle-double-right"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title text-white" id="deleteModalLabel">
+          <i class="fa fa-exclamation-triangle mr-2"></i>Delete Confirmation
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" id="deleteForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="text-center py-3">
+            <i class="fa fa-trash text-danger" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Are you sure?</h4>
+            <p class="text-muted">This action cannot be undone. The organism record will be permanently deleted.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times mr-1"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">
+            <i class="fa fa-trash mr-1"></i>Delete Record
+          </button>
+          <a href="{% url 'del_all_organism' %}" class="btn btn-warning" onclick="return confirm('⚠️ WARNING: This will delete ALL organism records. Are you absolutely sure?')">
+            <i class="fa fa-trash-alt mr-1"></i>Delete All
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Styles -->
+<style>
+.table-hover tbody tr:hover {
+  background-color: #f8fcfd;
+}
+
+#search-input:focus {
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.6rem;
+}
+</style>
+
+{% endblock content %}
+
+<!-- JavaScript -->
+{% block javascripts %}
+<script>
+$(document).ready(function(){
+  var deleteUrl; 
+  $('.delete-btn').on('click', function(){
+    deleteUrl = $(this).data('url');
+  });
+
+  $('#confirmDelete').on('click', function(){
+    window.location.href = deleteUrl;
+  });
+});
+
+// Search table function
+function searchTable() {
+  var input = document.getElementById("search-input");
+  var filter = input.value.toLowerCase();
+  var table = document.getElementById("organism-table");
+  var rows = table.querySelectorAll("tbody tr");
+
+  rows.forEach(row => {
+    var text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  });
+}
+
+// Clear search function
+function clearSearch() {
+  document.getElementById("search-input").value = "";
+  searchTable();
+}
+
+// Enter key support for search
+document.getElementById("search-input").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    searchTable();
+  }
+});
+</script>
+{% endblock javascripts %}

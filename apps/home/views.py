@@ -411,7 +411,7 @@ def show_batches(request):
 def review_batches(request):
     # Prefetch isolates if your Batch_Table is linked via ForeignKey
     isolate_qs = Referred_Data.objects.only(
-        "id", "AccessionNo", "SiteCode", "Patient_ID", "OrganismCode", "Batch_id"
+        "id", "AccessionNo", "SiteCode", "Patient_ID", "Site_Org", "Batch_id"
     )
 
     batches = (
@@ -836,7 +836,7 @@ def raw_data(request, id):
 
     # --- Determine year and organism codes ---
     specimen_year = isolates.Spec_Date.year if isolates.Spec_Date else None
-    site_org = isolates.OrganismCode.strip().lower() if isolates.OrganismCode else ""
+    site_org = isolates.Site_Org.strip().lower() if isolates.Site_Org else ""
     ars_org = isolates.ars_OrgCode.strip().lower() if isolates.ars_OrgCode else ""
 
     # --- Get all antibiotics (from Antibiotic_List) ---
@@ -1738,6 +1738,7 @@ def add_breakpoints(request, pk=None):
         'breakpoint': breakpoint,  # Pass breakpoint even if None
         'upload_form': upload_form,
     })
+
 
 @login_required(login_url="/login/")
 #View existing breakpoints
@@ -3667,7 +3668,7 @@ def generate_mapped_excel(request):
 
 
 
-#Antiboitic List
+############# Antibiotics Configuration
 
 @login_required(login_url="/login/")
 def add_antibiotics(request, pk=None):
@@ -3812,6 +3813,9 @@ def upload_antibiotics(request):
 
     return render(request, 'home/Antibiotic_list.html', {'upload_form': upload_form})
 
+
+
+
 @login_required(login_url="/login/")
 #for exporting into excel
 def export_antibiotics(request):
@@ -3850,3 +3854,149 @@ def delete_all_antibiotics(request):
     Antibiotic_List.objects.all().delete()
     messages.success(request, "All records have been deleted successfully.")
     return redirect('antibiotics_view')  # Redirect to the table view
+
+
+
+
+######################## Organism 
+
+@login_required(login_url="/login/")
+def add_organism(request, pk=None):
+    organism = None  # Initialize organism to avoid UnboundLocalError
+    upload_form = Organism_uploadForm()
+
+    if pk:  # Editing an existing organism
+        organism = get_object_or_404(Organism_List, pk=pk)
+        form = OrganismForm(request.POST or None, instance=organism)
+        editing = True
+    else:  # Adding a new organism
+        form = OrganismForm(request.POST or None)
+        editing = False
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Update Successful")
+            return redirect('organism_view')  # Redirect to avoid form resubmission
+
+    return render(request, 'home/Organism.html', {
+        'form': form,
+        'editing': editing,  # Pass editing flag to template
+        'organism': organism,  
+        'upload_form': upload_form,
+    })
+
+
+
+@login_required(login_url="/login/")
+#View existing breakpoints
+def view_organism(request):
+    organism = Organism_List.objects.all().order_by('Whonet_Org_Code')
+    paginator = Paginator(organism, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'home/Organism_view.html',{ 'organisms':organism,  'page_obj': page_obj})
+
+
+@login_required(login_url="/login/")
+#Delete Organism
+def del_organism (request, id):
+    organism = get_object_or_404(Organism_List, pk=id)
+    organism.delete()
+    return redirect('view_organism')
+
+
+@login_required(login_url="/login/")
+def del_all_organism(request):
+    Organism_List.objects.all().delete()
+    messages.success(request, "All records have been deleted successfully.")
+    return redirect('view_organism')  # Redirect to the table view
+
+
+
+
+@login_required(login_url="/login/")
+def upload_organisms(request):
+
+    if request.method == "POST":
+        upload_form = Organism_uploadForm(request.POST, request.FILES)
+
+        if upload_form.is_valid():
+            uploaded_file = upload_form.save()
+            file = uploaded_file.File_uploadOrg
+
+            try:
+                # Load file depending on extension
+                if file.name.endswith(".csv"):
+                    df = pd.read_csv(file)
+                elif file.name.endswith(".xlsx"):
+                    df = pd.read_excel(file)
+                else:
+                    messages.error(request, "Unsupported file format. Please upload CSV or Excel.")
+                    return redirect("upload_organisms")
+
+                # Fill NaN with empty string
+                df = df.fillna("")
+
+                # Required column
+                if "Whonet_Org_Code" not in df.columns:
+                    messages.error(request, "Missing required column: Whonet_Org_Code")
+                    return redirect("upload_organisms")
+
+                # Delete existing records matching incoming Whonet_Org_Code
+                whonet_codes = df["Whonet_Org_Code"].unique()
+                Organism_List.objects.filter(Whonet_Org_Code__in=whonet_codes).delete()
+
+                # Loop through DataFrame rows
+                for _, row in df.iterrows():
+                    Organism_List.objects.update_or_create(
+                        Whonet_Org_Code=row.get("Whonet_Org_Code", ""),
+                        defaults={
+                            "Replaced_by": row.get("Replaced_by", ""),
+                            "Organism": row.get("Organism", ""),
+                            "Organism_Type": row.get("Organism_Type", ""),
+                            "Family_Code": row.get("Family_Code", ""),
+                            "Genus_Group": row.get("Genus_Group", ""),
+                            "Genus_Code": row.get("Genus_Code", ""),
+                            "Species_Group": row.get("Species_Group", ""),
+                            "Serovar_Group": row.get("Serovar_Group", ""),
+                            "Kingdom": row.get("Kingdom", ""),
+                            "Phylum": row.get("Phylum", ""),
+                            "Class": row.get("Class", ""),
+                            "Order": row.get("Order", ""),
+                            "Family": row.get("Family", ""),
+                            "Genus": row.get("Genus", ""),
+                        }
+                    )
+
+                messages.success(request, "Organism list uploaded and updated successfully!")
+                return redirect("view_organism")
+
+            except Exception as e:
+                print("Upload error:", e)
+                messages.error(request, f"Error processing file: {e}")
+                return redirect("add_organism")
+
+        else:
+            messages.error(request, "Upload form is not valid.")
+
+    else:
+        upload_form = Organism_uploadForm()
+
+    return render(request, "home/Organism.html", {
+        "upload_form": upload_form
+    })
+
+
+@login_required
+def get_organism_name(request):
+    code = request.GET.get('code')
+
+    if not code:
+        return JsonResponse({"error": "Missing code"}, status=400)
+
+    try:
+        org = Organism_List.objects.get(Whonet_Org_Code=code)
+        return JsonResponse({"organism": org.Organism})
+    except Organism_List.DoesNotExist:
+        return JsonResponse({"organism": ""})

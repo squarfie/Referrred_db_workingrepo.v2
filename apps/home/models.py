@@ -152,8 +152,8 @@ class Referred_Data(models.Model):
     #Organism Result
     Site_Pre=models.CharField(max_length=255, blank=True,)
     Site_Org=models.CharField(max_length=255, blank=True,)
+    Site_OrgName=models.CharField(max_length=255, blank=True,)
     Site_Pos=models.CharField(max_length=255, blank=True,)
-    OrganismCode=models.CharField(max_length=255, blank=True,)
     Comments=models.TextField(blank=True, null=True)
     
     #ARSRL Sty Results
@@ -515,14 +515,11 @@ class Antibiotic_upload(models.Model):
         db_table = "Antibiotic_upload"
 
 
-
-
 class Organism_List(models.Model):
-    Whonet_Org_Code = models.CharField(max_length=20, unique=True)
+    Whonet_Org_Code= models.CharField(max_length=20, unique=True)
     Replaced_by = models.CharField(max_length=20, null=True, blank=True)
     Organism = models.CharField(max_length=255)
     Organism_Type = models.CharField(max_length=5, null=True, blank=True)
-    Subkingdom_Code = models.CharField(max_length=10, null=True, blank=True)
     Family_Code = models.CharField(max_length=20, null=True, blank=True)
     Genus_Group = models.CharField(max_length=50, null=True, blank=True)
     Genus_Code = models.CharField(max_length=20, null=True, blank=True)
@@ -536,7 +533,7 @@ class Organism_List(models.Model):
     Genus = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.Whonet_Org_Code} - {self.Organism}"
+        return f"{self.Whonet_Org_Code}"
 
 
 class Organism_upload(models.Model):
