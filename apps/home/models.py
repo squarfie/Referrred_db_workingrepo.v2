@@ -151,7 +151,7 @@ class Referred_Data(models.Model):
     OtherResMech=models.CharField(max_length=255, blank=True)
     #Organism Result
     Site_Pre=models.CharField(max_length=255, blank=True,)
-    Site_Org=models.CharField(max_length=255, blank=True,)
+    Site_Org=models.CharField(max_length=255, blank=True, default="")
     Site_OrgName=models.CharField(max_length=255, blank=True,)
     Site_Pos=models.CharField(max_length=255, blank=True,)
     Comments=models.TextField(blank=True, null=True)
@@ -170,7 +170,7 @@ class Referred_Data(models.Model):
     ars_ICR=models.CharField(max_length=255, choices=Common_pheno, default="n/a")
     ars_Pre=models.CharField( max_length=255, blank=True,)
     ars_Post=models.CharField(max_length=255, blank=True,)
-    ars_OrgCode=models.CharField(max_length=255, blank=True,)
+    ars_OrgCode=models.CharField(max_length=255, blank=True, default="")
     ars_OrgName=models.CharField(max_length=255, blank=True,)
     ars_ct_ctl=models.CharField(max_length=255, blank=True,)
     ars_tz_tzl=models.CharField(max_length=255, blank=True,)
@@ -224,6 +224,9 @@ class Referred_Data(models.Model):
         self.arsp_Lab_Lic = self.arsp_Lab_Lic or ""
         self.arsp_Head = self.arsp_Head or ""
         self.arsp_Head_Lic = self.arsp_Head_Lic or ""
+        self.Site_Org = self.Site_Org or ""
+        self.ars_OrgCode = self.ars_OrgCode or ""
+        self.Site_OrgName = self.Site_OrgName or ""
         super().save(*args, **kwargs)
 
 

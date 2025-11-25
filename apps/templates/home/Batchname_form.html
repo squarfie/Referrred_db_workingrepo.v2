@@ -24,32 +24,42 @@
 
 {% block content %}
 <!-- Animated Header -->
-<div class="header-container pb-6">
-  <!-- Background animations -->
-  <div class="grid-bg"></div>
-  
-  <div class="particles">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
+<div class="header-container">
+       <div class="background-animation-wrapper" aria-hidden="true">
+
+      <!-- Grid Background -->
+      <div class="grid-bg"></div>
+
+      <!-- Rising Particles -->
+      <div class="particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+      </div>
+
+      <!-- Scanners -->
+      <div class="scanner"></div>
+      <div class="scanner"></div>
+      <div class="scanner"></div>
+
+      <!-- Glow Orbs -->
+      <div class="glow-orb" ></div>
+      <div class="glow-orb" ></div>
+
+      <!-- Gradient Overlay -->
+      <div class="overlay"></div>
+
   </div>
-
-  <div class="scanner"></div>
-  <div class="scanner"></div>
-  <div class="scanner"></div>
-
-  <div class="glow-orb"></div>
-  <div class="glow-orb"></div>
 
 
   <!-- Header content -->
-  <div class="container-fluid">
+<div class="container-fluid">
     <div class="header-body">
       <div class="row align-items-center py-4">
         <div class="col-lg-8 col-12">
@@ -69,7 +79,7 @@
 </div>
 
 <!-- Main content -->
-<div class="container-fluid mt--7" >
+<div class="container-fluid mt--6" >
   <div class="row justify-content-center">
     <div class="col-lg-11 col-md-12">
       <!-- Batch form card -->

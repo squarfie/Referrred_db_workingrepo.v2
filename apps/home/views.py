@@ -937,165 +937,6 @@ def raw_data(request, id):
         "edit_mode": True,
     })
 
-#############################  
-@login_required(login_url="/login/")
-def reload_antibiotics(request):
-    site_org = request.GET.get("site_org", "").strip().lower()
-    ars_orgcode = request.GET.get("ars_orgcode", "").strip().lower()
-    specimen_date = request.GET.get("specimen_date", "")
-
-
-    try:
-        specimen_year = int(specimen_date.split("-")[0])
-    except:
-        specimen_year = None
-
-  
-    if specimen_year:
-        breakpoint_year = (
-            BreakpointsTable.objects.filter(Year__lte=specimen_year)
-            .order_by("-Year")
-            .values_list("Year", flat=True)
-            .first()
-        )
-    else:
-        breakpoint_year = (
-            BreakpointsTable.objects.all()
-            .order_by("-Year")
-            .values_list("Year", flat=True)
-            .first()
-        )
-
-    # ---- Filter Main Antibiotics (Site_Org) ----
-    main_abx = BreakpointsTable.objects.filter(
-        Year=breakpoint_year
-    ).filter(
-        Q(Org__iexact=site_org) | Q(Org="") | Q(Org__isnull=True)
-    ).values_list("Whonet_Abx", flat=True).distinct()
-
-    antibiotics_main = Antibiotic_List.objects.filter(
-        Show=True,
-        Whonet_Abx__in=main_abx
-    )
-
-    # ---- Filter Retest Antibiotics (ARS_OrgCode) ----
-    retest_abx = BreakpointsTable.objects.filter(
-        Year=breakpoint_year
-    ).filter(
-        Q(Org__iexact=ars_orgcode) | Q(Org="") | Q(Org__isnull=True)
-    ).values_list("Whonet_Abx", flat=True).distinct()
-
-    antibiotics_retest = Antibiotic_List.objects.filter(
-        Retest=True,
-        Whonet_Abx__in=retest_abx
-    )
-
-    # ---- Render partial HTML ----
-    main_html = render_to_string("partials/main_antibiotics.html", {
-        "antibiotics_main": antibiotics_main
-    })
-
-    retest_html = render_to_string("partials/retest_antibiotics.html", {
-        "antibiotics_retest": antibiotics_retest
-    })
-
-    return JsonResponse({
-        "main_html": main_html,
-        "retest_html": retest_html
-    })
-
-
-
-################ Reload antibiotics view (dynamically)
-@login_required(login_url="/login/")
-def reload_antibiotics(request):
-    """
-    Returns filtered antibiotics based on:
-    - Specimen year (closest <= breakpoint year)
-    - Organism code (Site_Org for main, ars_OrgCode for retest)
-    Falls back to blank Org if no organism-specific match.
-    """
-    site_org = (request.GET.get("site_org") or "").strip().lower()
-    ars_orgcode = (request.GET.get("ars_orgcode") or "").strip().lower()
-    specimen_date = request.GET.get("specimen_date", "")
-
-    # --- Determine specimen year ---
-    specimen_year = None
-    if specimen_date:
-        try:
-            specimen_year = datetime.strptime(specimen_date, "%Y-%m-%d").year
-        except Exception:
-            specimen_year = None
-
-    # --- Determine closest breakpoint year ---
-    if specimen_year:
-        breakpoint_year = (
-            BreakpointsTable.objects.filter(Year__lte=specimen_year)
-            .order_by("-Year")
-            .values_list("Year", flat=True)
-            .first()
-        )
-    else:
-        breakpoint_year = (
-            BreakpointsTable.objects.all()
-            .order_by("-Year")
-            .values_list("Year", flat=True)
-            .first()
-        )
-
-    # --- MAIN antibiotics (Site_Org logic) ---
-    if site_org:
-        bp_orgs = BreakpointsTable.objects.filter(
-            Q(Org__iexact=site_org) | Q(Org__isnull=True) | Q(Org=""),
-            Year=breakpoint_year
-        ).values_list("Whonet_Abx", flat=True).distinct()
-    else:
-        bp_orgs = BreakpointsTable.objects.filter(
-            Year=breakpoint_year
-        ).values_list("Whonet_Abx", flat=True).distinct()
-
-    antibiotics_main = Antibiotic_List.objects.filter(
-        Show=True,
-        Whonet_Abx__in=bp_orgs
-    )
-
-    # --- RETEST antibiotics (ars_OrgCode logic) ---
-    if ars_orgcode:
-        bp_retest_orgs = BreakpointsTable.objects.filter(
-            Q(Org__iexact=ars_orgcode) | Q(Org__isnull=True) | Q(Org=""),
-            Year=breakpoint_year
-        ).values_list("Whonet_Abx", flat=True).distinct()
-    else:
-        bp_retest_orgs = BreakpointsTable.objects.filter(
-            Year=breakpoint_year
-        ).values_list("Whonet_Abx", flat=True).distinct()
-
-    antibiotics_retest = Antibiotic_List.objects.filter(
-        Retest=True,
-        Whonet_Abx__in=bp_retest_orgs
-    )
-
-    # --- Render partials ---
-    html_main = render_to_string("partials/_antibiotic_main.html", {
-        "antibiotics_main": antibiotics_main,
-        "breakpoint_year": breakpoint_year,
-        "existing_entries": None  # dynamically loaded, no instance here
-    })
-
-    html_retest = render_to_string("partials/_antibiotic_retest.html", {
-        "whonet_retest_data": antibiotics_retest,
-        "breakpoint_year": breakpoint_year,
-        "retest_entries": None
-    })
-
-    return JsonResponse({
-        "main_html": html_main,
-        "retest_html": html_retest,
-        "breakpoint_year": breakpoint_year or "N/A",
-        "count_main": antibiotics_main.count(),
-        "count_retest": antibiotics_retest.count(),
-    })
-
 
 #Retrieve all data
 @login_required(login_url="/login/")
@@ -1498,7 +1339,7 @@ def generate_pdf(request, id):
     isolate = get_object_or_404(Referred_Data, pk=id)
     
     # Fetch related antibiotic entries
-    antibiotic_entries = AntibioticEntry.objects.filter(ab_idNumber_egasp=isolate)
+    antibiotic_entries = AntibioticEntry.objects.filter(ab_idNum_referred=isolate)
 
     # Debugging: Print antibiotic entries to verify data
     print("Antibiotic Entries Count:", antibiotic_entries.count())
@@ -1544,7 +1385,6 @@ def generate_pdf(request, id):
         return HttpResponse(f'Error in generating PDF: {html}')
     
     return response
-
 
 
 @login_required(login_url="/login/")

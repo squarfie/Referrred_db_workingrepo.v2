@@ -91,7 +91,6 @@ urlpatterns = [
     path('upload/', include('apps.wgs_app.urls')),
     path('final/', include('apps.home_final.urls')),
 
-    path('reload_antibiotics/', views.reload_antibiotics, name='reload_antibiotics'),
     # path('batch/', views.show_accession, name="show_accession"),
  
 

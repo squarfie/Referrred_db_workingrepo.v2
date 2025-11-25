@@ -5,73 +5,72 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+
+
 {% endblock stylesheets %}
 
 {% block content %}
 
 <body>
-    <div class="header-container">
-        <!-- Animated background elements -->
-        <div class="grid-bg"></div>
 
-        <!-- Particles rising -->
-        <div class="particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
+   <div class="header-container">
+      <div class="background-animation-wrapper" aria-hidden="true">
+
+      <!-- Grid Background -->
+      <div class="grid-bg"></div>
+
+      <!-- Rising Particles -->
+      <div class="particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+      </div>
+
+      <!-- Scanners -->
+      <div class="scanner"></div>
+      <div class="scanner"></div>
+      <div class="scanner"></div>
+
+      <!-- Glow Orbs -->
+      <div class="glow-orb" ></div>
+      <div class="glow-orb" ></div>
+
+      <!-- Gradient Overlay -->
+      <div class="overlay"></div>
+
+  </div>
+  <!-- END ANIMATION WRAPPER -->
+
+    <div class="header-content index-font">
+        <h1>Antimicrobial Resistance Surveillance Program</h1>
+        <p>AST Results Management System</p>
+
+        <div class="badge-group">
+            <div class="badge"><span class="badge-icon">🔬</span>Emerging Pathogens</div>
+            <div class="badge"><span class="badge-icon">📊</span>Real-time Data</div>
+            <div class="badge"><span class="badge-icon">⚡</span>TAT Monitoring</div>
         </div>
-
-        <!-- Scanning circles -->
-        <div class="scanner"></div>
-        <div class="scanner"></div>
-        <div class="scanner"></div>
-
-        <!-- Glow orbs -->
-        <div class="glow-orb"></div>
-        <div class="glow-orb"></div>
-
-
-        <!-- Header content -->
-        <div class="header-content index-font">
-            <h1>Antimicrobial Resistance Surveillance Program</h1>
-            <p>AST Results Management System</p>
-            <div class="badge-group">
-                <div class="badge">
-                    <span class="badge-icon">🔬</span>
-                    <span>Emerging Pathogens</span>
-                </div>
-                <div class="badge">
-                    <span class="badge-icon">📊</span>
-                    <span>Real-time Data</span>
-                </div>
-                <div class="badge">
-                    <span class="badge-icon">⚡</span>
-                    <span>TAT Monitoring</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats display -->
-        <div class="header-stats index-font">
-            <div class="stat-item">
-                <span class="stat-number">{{ record_count }}</span>
-                <span class="stat-label">Total Records</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">{{ site_count }}</span>
-                <span class="stat-label">Active Sites</span>
-            </div>
-        </div>
-
-        <!-- New CRF Button -->
-        <a href="{% url 'batch_create_view' %}" class="btn-new-crf index-font">+ Add New</a>
     </div>
+
+    <div class="header-stats index-font">
+        <div class="stat-item">
+            <span class="stat-number">{{ record_count }}</span>
+            <span class="stat-label">Total Records</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ site_count }}</span>
+            <span class="stat-label">Active Sites</span>
+        </div>
+    </div>
+
+    <a href="{% url 'batch_create_view' %}" class="btn-new-crf index-font">+ Add New</a>
+</div>
 
     <!-- Header -->
     <div id="slideshow-header" class="header bg-primary pb-6 g-gradient-default align-items-center index-font" style="min-height: 180px; background-size: cover; background-image: url(/static/assets/img/theme/resistance2.jpg); background-position: center center;">

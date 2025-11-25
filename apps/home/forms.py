@@ -145,6 +145,7 @@ class Referred_Form(forms.ModelForm):
             self.fields['Site_Org'].queryset = Organism_List.objects.all() # Always load the latest Site Code
             self.fields['Site_Org'].label_from_instance = lambda obj: obj.Whonet_Org_Code
             self.fields['Site_OrgName'].label_from_instance = lambda obj: obj.Organism
+
         
         
 
