@@ -1,13 +1,16 @@
 
-
+{% extends 'layouts/base.html' %}
 {% load static %} 
 {% load widget_tweaks %}
 
+{% block title %}Antibiotic Entries{% endblock title %}
 
-{% block title %} Add New Hospital {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+
+
 {% endblock stylesheets %}
 
 {% block content %}

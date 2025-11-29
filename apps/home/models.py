@@ -508,7 +508,8 @@ class Antibiotic_List(models.Model):
     class Meta:
         db_table = "Antibiotic_List"
 
-
+    def __str__(self):
+        return f"{self.Whonet_Abx}"
 
 
 class Antibiotic_upload(models.Model):

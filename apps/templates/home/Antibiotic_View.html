@@ -1,6 +1,15 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
 {% load custom_filters %}
-{% block title %}Breakpoints Database{% endblock title %}
+
+{% block title %} View Antibiotics {% endblock title %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+{% endblock stylesheets %}
+
 
 {% block content %}
 
@@ -46,13 +55,13 @@
             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
               <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
               <li class="breadcrumb-item"><a href="{% url 'batch_create_view' %}">Create Batch</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'add_antibiotics'%}">Antibiotics</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'settings_page'%}">Antibiotics</a></li>
               <li class="breadcrumb-item active" aria-current="page">View All</li>
             </ol>
           </nav>
         </div>
         <div class="col-lg-6 col-5 text-right">
-          <a class="btn btn-sm btn-neutral" href="{% url 'add_antibiotics'%}">
+          <a class="btn btn-sm btn-neutral" href="{% url 'settings_page'%}">
             <i class="fas fa-plus mr-1"></i>Add New
           </a>
           <button class="btn btn-sm btn-neutral" onclick="history.back()">

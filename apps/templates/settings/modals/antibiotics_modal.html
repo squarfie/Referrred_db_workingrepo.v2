@@ -1,0 +1,58 @@
+{% load static %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
+
+{% endblock stylesheets %}
+
+<div class="modal fade" id="UploadModal" tabindex="-1" role="dialog" aria-labelledby="UploadModalLabel" aria-hidden="true">
+  <form method="POST" action="{% url 'upload_antibiotics' %}" autocomplete="on" enctype="multipart/form-data"
+        onsubmit="return confirmOverwrite();" id="uploadbreakpointform">
+
+    {% csrf_token %}
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+
+        <!-- THEMED HEADER -->
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-file-upload mr-2"></i>
+            Upload Antibiotics
+          </h5>
+          <button type="button" class="close btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- THEMED BODY -->
+        <div class="modal-body">
+
+          <!-- Warning alert (uses theme style from settings.css) -->
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Warning:</strong> Uploading will replace all existing breakpoints.
+          </div>
+
+          <!-- File Upload Field -->
+          <div class="form-group">
+            <label for="File_uploadBP" class="form-control-label">
+              <i class="fas fa-file-csv mr-1"></i>Select CSV/Excel File
+            </label>
+            {{ abx_upload_form.File_uploadAbx }}
+          </div>
+
+        </div>
+
+        <!-- THEMED FOOTER -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times mr-1"></i>Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-upload mr-1"></i>Upload File
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </form>
+</div>

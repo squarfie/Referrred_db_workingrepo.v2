@@ -1,0 +1,117 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}System Settings{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+<h2><i class="fas fa-cogs mr-2"></i> System Settings </h2>
+<br>
+    <div class="row mt--10">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="col-md-4 col-lg-3 ">
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Configuration Menu</h5>
+                </div>
+
+                <div class="list-group list-group-flush" role="tablist">
+
+                    <a class="list-group-item list-group-item-action active"
+                       data-toggle="list" href="#organism_tab" role="tab">
+                        <i class="fa fa-bug mr-2"></i> Organisms
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#antibiotics_tab" role="tab">
+                        <i class="fas fa-pills mr-2"></i> Antibiotics
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#breakpoints_tab" role="tab">
+                        <i class="fas fa-chart-line mr-2"></i> Breakpoints
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#sitecode_tab" role="tab">
+                        <i class="fas fa-hospital mr-2"></i> Site Code
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#specimen_tab" role="tab">
+                        <i class="fas fa-vial mr-2"></i> Specimen Types
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#contact_tab" role="tab">
+                        <i class="fas fa-user-md mr-2"></i> ARSP Staff
+                    </a>
+
+                    <a class="list-group-item list-group-item-action"
+                       data-toggle="list" href="#tat_tab" role="tab">
+                        <i class="fas fa-clock mr-2"></i> TAT Process
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT CONTENT AREA -->
+        <div class="col-md-8 col-lg-9">
+
+              <div class="tab-content settings-tab-content">
+
+                <!-- Organisms -->
+                <div class="tab-pane fade show active" id="organism_tab" role="tabpanel">
+                    {% include "settings/tabs/organism_tab.html" %}
+                </div>
+
+                <!-- Antibiotics -->
+                <div class="tab-pane fade" id="antibiotics_tab" role="tabpanel">
+                    {% include "settings/tabs/antibiotics_tab.html" %}
+                    
+                </div>
+
+                <!-- Breakpoints -->
+                <div class="tab-pane fade" id="breakpoints_tab" role="tabpanel">
+                    {% include "settings/tabs/breakpoints_tab.html" %}
+                </div>
+
+                <!-- Site Code -->
+                <div class="tab-pane fade" id="sitecode_tab" role="tabpanel">
+                    {% include "settings/tabs/sitecode_tab.html" %}
+                </div>
+
+                <!-- Specimen Type -->
+                <div class="tab-pane fade" id="specimen_tab" role="tabpanel">
+                    {% include "settings/tabs/specimen_tab.html" %}
+                </div>
+
+                <!-- ARSP Contact -->
+                <div class="tab-pane fade" id="contact_tab" role="tabpanel">
+                    {% include "settings/tabs/contact_tab.html" %}
+                </div>
+
+                <!-- TAT -->
+                <div class="tab-pane fade" id="tat_tab" role="tabpanel">
+                    {% include "settings/tabs/tat_tab.html" %}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

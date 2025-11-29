@@ -272,14 +272,14 @@ def save(self, commit=True):
 
 #Breakpoints data
 class BreakpointsForm(forms.ModelForm):
-     class Meta:
+    class Meta:
           model = BreakpointsTable
           fields = '__all__'
           widgets = { 
                'Potency': forms.NumberInput(attrs={'min': 0, 'max': 1000}),
                      }
           
-     def save(self, commit=True):
+    def save(self, commit=True):
         instance = super().save(commit=False)
         
         # Replace None with an empty string or another default value

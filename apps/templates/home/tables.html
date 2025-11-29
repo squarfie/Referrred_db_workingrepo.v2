@@ -1,503 +1,505 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
 
-{% block title %} Tables {% endblock title %}
+{% block title %} View Records {% endblock title %}
 
 {% block stylesheets %}
-
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
 {% endblock stylesheets %}
 
 {% block content %}
+
+<!-- Animated Header -->
 <div class="header-container">
-       <div class="background-animation-wrapper" aria-hidden="true">
+  <div class="background-animation-wrapper" aria-hidden="true">
+    <!-- Grid Background -->
+    <div class="grid-bg"></div>
 
-      <!-- Grid Background -->
-      <div class="grid-bg"></div>
+    <!-- Rising Particles -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
 
-      <!-- Rising Particles -->
-      <div class="particles">
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-      </div>
+    <!-- Scanners -->
+    <div class="scanner"></div>
+    <div class="scanner"></div>
+    <div class="scanner"></div>
 
-      <!-- Scanners -->
-      <div class="scanner"></div>
-      <div class="scanner"></div>
-      <div class="scanner"></div>
+    <!-- Glow Orbs -->
+    <div class="glow-orb"></div>
+    <div class="glow-orb"></div>
 
-      <!-- Glow Orbs -->
-      <div class="glow-orb" ></div>
-      <div class="glow-orb" ></div>
-
-      <!-- Gradient Overlay -->
-      <div class="overlay"></div>
-
+    <!-- Gradient Overlay -->
+    <div class="overlay"></div>
   </div>
-    <div class="container-fluid invisible-container col-lg-12" style="backface-visibility: hidden; background: transparent; box-shadow: none; border: none;">
 
-      <div class="header-body">
-        <div class="row align-items-center py-4">
-          <div class="col-lg-6 col-7">
-            <i class="fas fa-briefcase" style="color: white; font-size: 18px;"></i>
-            <h6 class="h2 text-white d-inline-block mb-0">&nbsp;Referred Isolates Database</h6>
-            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
-              <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
-                <li class="breadcrumb-item active" aria-current="page">View All</li>
-              </ol>
-            </nav>
-          </div>
-     
-          <div class="col-lg-6 col-5 text-right">
-            <a class="btn btn-sm btn-neutral" href="{% url 'batch_create_view' %}">Add New</a>
-             <a class="btn btn-sm btn-warning" href="{% url 'review_batches' %}">Review Batches</a>
-            <a class="btn btn-sm btn-neutral" href="{% url 'abxentry_view' %}">Antibiotic Results</a>
-          </div>
-      
-        </div>
-
+  <!-- Header Content -->
+  <div class="header-content">
+    <h1>
+      <i class="fas fa-database mr-2"></i>View Records
+    </h1>
+    <p>View, search, and manage all laboratory records</p>
+    <div class="badge-group">
+      <span class="badge">
+        <i class="badge-icon fas fa-flask"></i>
+        {{ page_obj.paginator.count }} Total Records
+      </span>
+      <span class="badge">
+        <i class="badge-icon fas fa-list"></i>
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
     </div>
   </div>
-  </div>
-  <!-- Page content -->
-  <div class="container-fluid mt--6">
-    <div class="row">
-      <div class="col">
-        <div class="card">
-          <!-- Card header -->
-          <!-- <div class="card-header border-0">
-            <div class="row">
-              <div class="col md-6 d-flex justify-content-end">
-                <form id="search-input" class="navbar-search navbar-search-light form-inline mr-sm-3" id="navbar-search-main">
+</div>
 
-                  <div class="form-group mb-0">
-                    <div class="input-group input-group-alternative input-group-merge">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                      </div>
-                      <input class="form-control" placeholder="Search" type="text" onkeyup="searchTable()">
-                    </div>
-                  </div>
-                  <button type="button" class="close" data-action="search-close" data-target="#navbar-search-main" aria-label="Close">
-                    <span aria-hidden="true">x</span>
-                  </button>
-                  
-                </form>
+<!-- Page Content -->
+<div class="container-fluid mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-12 col-md-12">
+      <!-- Main Card -->
+      <div class="form-card">
+        <!-- Header with Action Buttons -->
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h4 class="mb-0">
+            <i class="fas fa-table mr-2"></i>Records Table
+          </h4>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-primary btn-sm" href="{% url 'batch_create_view' %}" title="Create a new batch">
+              <i class="fas fa-plus mr-1"></i>Add New Batch
+            </a>
+            <a class="btn btn-secondary btn-sm" href="{% url 'review_batches' %}" title="Review existing batches">
+              <i class="fas fa-check-circle mr-1"></i>Review Batches
+            </a>
+            <a class="btn btn-info btn-sm" href="{% url 'abxentry_view' %}" title="Enter antibiotic results">
+              <i class="fas fa-microscope mr-1"></i>Antibiotic Results
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Search Bar -->
+          <div class="search-controls">
+            <form method="get" class="row align-items-center gy-3">
+              <div class="col-lg-8 col-md-12">
+                <div class="search-box">
+                  <i class="fas fa-search search-icon"></i>
+                  <input
+                    type="text"
+                    name="q"
+                    id="globalSearch"
+                    value="{{ query|default:'' }}"
+                    class="form-control"
+                    placeholder="Search: Accession No, Patient Name, Specimen Type..."
+                  >
+                </div>
+
+                {% if query %}
+                <div class="search-results-info">
+                  <i class="fas fa-info-circle mr-1"></i>Showing results for: <strong>{{ query }}</strong>
+                </div>
+                {% endif %}
               </div>
-            </div>
-          </div> -->
-            <div style="padding-top: 1.5rem; text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-                        border-radius: 0 0 12px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-              <form method="get" class="row align-items-center" style="margin:0;">
-                <!-- 🔍 Search Input -->
-                <div class="col-lg-8 col-md-12 mb-3 mb-lg-0">
-                  <div style="position: relative;">
-                    <i class="fas fa-search"
-                      style="position: absolute; left: 1rem; top: 50%;
-                              transform: translateY(-50%); color: #999;
-                              pointer-events: none;"></i>
-                    <input
-                      type="text"
-                      name="q"
-                      id="globalSearch"
-                      value="{{ query|default:'' }}"
-                      class="form-control"
-                      placeholder="Search by accession, patient name, ID, specimen type, organism... (search across all pages)"
-                      style="padding-left: 2.5rem; border: 2px solid #e8e8e8;
-                            border-radius: 8px; transition: all 0.3s ease;"
-                    >
-                  </div>
-                  <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
-                    {% if query %}
-                      Showing results for: <strong>{{ query }}</strong>
-                    {% endif %}
-                  </div>
-                </div>
 
-                <!-- 🔁 Reset Button -->
-                <div class="col-lg-4 col-md-12 text-lg-right text-center">
-                  <button type="submit" class="btn btn-sm btn-primary">
-                    <i class="fas fa-search mr-1"></i>Search
-                  </button>
-                <button class="btn btn-sm btn-secondary" onclick="clearSearch()">
-                  <i class="fas fa-redo mr-1"></i>Reset Search
+              <div class="col-lg-4 col-md-12 d-flex gap-2 justify-content-lg-end">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1 flex-lg-grow-0">
+                  <i class="fas fa-search mr-1"></i>Search
                 </button>
-                </div>
-              </form>
-            </div>
+                <button type="button" class="btn btn-secondary btn-sm flex-grow-1 flex-lg-grow-0" onclick="clearSearch()">
+                  <i class="fas fa-redo mr-1"></i>Reset
+                </button>
+              </div>
+            </form>
+          </div>
 
-          <!-- Light table -->
-          <div class="table-responsive" style="max-height: 500px;  overflow-y: auto; overflow-x: auto;">
-            <table class="table align-items-center table-flush" style="border-collapse: collapse; margin: 0%; padding: 0%;">
-              <thead class="thead-light" style="text-align: center;">
-                <tr >
-                  <th scope="col">ACTION</th>
-                  <th scope="col">COPIED TO FINAL</th>
-                  
-                    <th  colspan="2" scope="col" >
-                      <a href="?sort=AccessionNo&order={% if current_sort == 'AccessionNo' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
-                        Identification
-                        {% if current_sort == 'AccessionNo' %}
-                          {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                      </a>
-                    </th>
-                   <th colspan="2" scope="col" >
-                      <a href="?sort=First_Name&order={% if current_sort == 'First_Name' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
-                        Patient Details
-                        {% if current_sort == 'First_Name' %}
-                          {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                      </a>
-                    </th>
-                   <th colspan="2" scope="col" >
-                      <a href="?sort=Spec_Type&order={% if current_sort == 'Spec_Type' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
-                        Specimen Details
-                        {% if current_sort == 'Spec_Type' %}
-                          {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                      </a>
-                    </th>
-                  <th scope="col" >
-                      <a href="?sort=Date_of_Entry&order={% if current_sort == 'Date_of_Entry' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
-                        Date Modified
-                        {% if current_sort == 'Date_of_Entry' %}
-                          {% if current_order == 'asc' %}▲{% else %}▼{% endif %}
-                        {% endif %}
-                      </a>
-                    </th>
-                  <th scope="col">Antibiotic Results</th>
-                  <th> PRINT</th>
+          <!-- Table -->
+          <div class="table-responsive">
+            <table class="table table-hover align-items-center mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th class="text-center">
+                    <i class="fas fa-cogs mr-1"></i>ACTION
+                  </th>
+                  <th class="text-center">
+                    <i class="fas fa-check mr-1"></i>COPIED
+                  </th>
+
+                  <th colspan="2" class="cursor-pointer">
+                    <a href="?sort=AccessionNo&order={% if current_sort == 'AccessionNo' and current_order == 'asc' %}desc{% else %}asc{% endif %}" class="text-white text-decoration-none">
+                      <i class="fas fa-id-card mr-1"></i>Identification
+                      {% if current_sort == 'AccessionNo' %}
+                        <i class="fas fa-arrow-{% if current_order == 'asc' %}up{% else %}down{% endif %} ml-1"></i>
+                      {% endif %}
+                    </a>
+                  </th>
+
+                  <th colspan="2" class="cursor-pointer">
+                    <a href="?sort=First_Name&order={% if current_sort == 'First_Name' and current_order == 'asc' %}desc{% else %}asc{% endif %}" class="text-white text-decoration-none">
+                      <i class="fas fa-user mr-1"></i>Patient Details
+                      {% if current_sort == 'First_Name' %}
+                        <i class="fas fa-arrow-{% if current_order == 'asc' %}up{% else %}down{% endif %} ml-1"></i>
+                      {% endif %}
+                    </a>
+                  </th>
+
+                  <th colspan="2" class="cursor-pointer">
+                    <a href="?sort=Spec_Type&order={% if current_sort == 'Spec_Type' and current_order == 'asc' %}desc{% else %}asc{% endif %}" class="text-white text-decoration-none">
+                      <i class="fas fa-flask mr-1"></i>Specimen Details
+                      {% if current_sort == 'Spec_Type' %}
+                        <i class="fas fa-arrow-{% if current_order == 'asc' %}up{% else %}down{% endif %} ml-1"></i>
+                      {% endif %}
+                    </a>
+                  </th>
+
+                  <th class="cursor-pointer">
+                    <a href="?sort=Date_of_Entry&order={% if current_sort == 'Date_of_Entry' and current_order == 'asc' %}desc{% else %}asc{% endif %}" class="text-white text-decoration-none">
+                      <i class="fas fa-calendar mr-1"></i>Date Modified
+                      {% if current_sort == 'Date_of_Entry' %}
+                        <i class="fas fa-arrow-{% if current_order == 'asc' %}up{% else %}down{% endif %} ml-1"></i>
+                      {% endif %}
+                    </a>
+                  </th>
+
+                  <th>
+                    <i class="fas fa-pills mr-1"></i>Antibiotic Results
+                  </th>
+
+                  <th class="text-center">
+                    <i class="fas fa-print mr-1"></i>PRINT
+                  </th>
                 </tr>
               </thead>
+
               <tbody class="list">
                 {% for isolate in page_obj %}
-               <tr>
-                  <td style="text-align: center;">
-                  <a href="{%url 'edit_data' isolate.id %}" class="text-success"> <i class="fa fa-pencil-alt" aria-hidden="true"></i> &nbspEdit</a> <span style="display: block; line-height: 8px;"><br></span>
-                <a href="#" class="text-danger delete-btn" data-toggle="modal" data-target="#deleteModal" data-url="{% url 'delete_data' isolate.id %}">
-                <i class="fa fa-trash" aria-hidden="true"></i> &nbspDelete</a> <span style="display: block; line-height: 8px;"><br></span>
+                <tr class="searchable-row"
+                    data-search-text="{{ isolate.AccessionNo }} {{ isolate.First_Name }} {{ isolate.Last_Name }} {{ isolate.Spec_Type }}">
 
-                <button 
-                  type="button" 
-                  class="btn btn-success btn-sm"
-                  onclick="if(confirm('Copy this isolate to Final Data?')) { window.location.href='{% url 'copy_data_to_final' id=isolate.id %}'; }">
-                  Copy to Final
-                </button>
+                  <!-- ACTION COLUMN -->
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <a href="{% url 'edit_data' isolate.id %}" class="btn btn-outline-success" title="Edit this record">
+                        <i class="fa fa-pencil-alt"></i>
+                      </a>
 
-                  </td>
-                  <td style="text-align: center;">
-                      {% if isolate.AccessionNo in copied_ids %}
-                        <!-- Already copied -->
-                        <input 
-                          type="checkbox" 
-                          class="form-check-input" 
-                          id="copyCheckbox_{{ isolate.id }}" 
-                          checked 
-                          disabled>
-                      {% else %}
-                        <!-- Not yet copied -->
-                        <input 
-                          type="checkbox" 
-                          class="form-check-input" 
-                          id="copyCheckbox_{{ isolate.id }}" 
-                          onclick="if(confirm('Copy this isolate to Final Data?')) { window.location.href='{% url 'copy_data_to_final' id=isolate.id %}'; } else { this.checked=false; }"
-                          disabled>
-                      {% endif %}
+                      <button type="button" class="btn btn-outline-danger delete-btn"
+                              data-toggle="modal"
+                              data-target="#deleteModal"
+                              data-url="{% url 'delete_data' isolate.id %}"
+                              title="Delete this record">
+                        <i class="fa fa-trash"></i>
+                      </button>
 
+                      <button type="button" class="btn btn-outline-info"
+                              onclick="if(confirm('Copy this isolate to Final Data?')) window.location.href='{% url 'copy_data_to_final' isolate.id %}'"
+                              title="Copy to final data">
+                        <i class="fas fa-copy"></i>
+                      </button>
+                    </div>
                   </td>
 
+                  <!-- COPIED CHECK COLUMN -->
+                  <td class="text-center">
+                    <div class="form-check d-flex justify-content-center">
+                      <input type="checkbox" class="form-check-input"
+                        {% if isolate.AccessionNo in copied_ids %}checked{% endif %}
+                        disabled>
+                    </div>
+                  </td>
+
+                  <!-- IDENTIFICATION COLUMN -->
                   <td colspan="2">
-                      Batch: &nbsp; <strong>{{isolate.Batch_Code}}</strong> <br>
-                      Accession No: &nbsp; <strong>{{isolate.AccessionNo}}</strong><br> 
-                      Referral Date: &nbsp;<strong>  {{isolate.Referral_Date}}</strong> <br>
-                      Site: &nbsp; <strong> {{isolate.SiteCode}}</strong>  <br>
+                    <div class="record-info">
+                      <div><strong class="text-primary">Batch:</strong> {{ isolate.Batch_Code }}</div>
+                      <div><strong class="text-primary">Accession:</strong> {{ isolate.AccessionNo }}</div>
+                      <div><strong class="text-primary">Referral Date:</strong> {{ isolate.Referral_Date }}</div>
+                      <div><strong class="text-primary">Site:</strong> {{ isolate.SiteCode }}</div>
+                    </div>
                   </td>
-                  <td colspan="2">Patient Name: &nbsp; <strong>{{isolate.First_Name}}</strong>&nbsp; <strong>{{isolate.Last_Name}} </strong><br>
-                      Patient ID: &nbsp; <strong>{{isolate.Patient_ID}}</strong> <br>
-                      Age: &nbsp; <strong>{{isolate.Age}}</strong> <br>
-                      Sex: &nbsp; <strong>{{isolate.Sex}}</strong> <br>
-                  </td>
-                  <td colspan="2">Specimen Date: &nbsp; <strong>{{isolate.Spec_Date}}</strong><br>
-                      Date of Admission: &nbsp; <strong>{{isolate.Date_Admis}}</strong> <br>
-                      Specimen Num: &nbsp; <strong>{{isolate.Spec_Num}}</strong><br>
-                      Specimen Type: &nbsp; <strong>{{isolate.Spec_Type}}</strong><br>
-                  </td>
-                  <td style="text-align: center;">{{isolate.Date_of_Entry|date:"F, d, Y" }}</td>
-                  
-                  <td>
-                    {% for antibiotic_entry in isolate.antibiotic_entries.all %}
-                   
-                            {% if antibiotic_entry.ab_Disk_value %}
-                                <strong>{{ antibiotic_entry.ab_Antibiotic }}</strong>  
-                                (Disk: <strong>{{ antibiotic_entry.ab_Disk_value }}</strong> 
-                                &nbsp;<strong>{{ antibiotic_entry.ab_Disk_enRIS }}</strong>)
-                                &nbsp;<span style="color: red;">{{ antibiotic_entry.ab_Disk_RIS }}</span>
-                                <br>
-                            {% endif %}
 
-                            {% if antibiotic_entry.ab_MIC_value %}
-                                <strong>{{ antibiotic_entry.ab_Antibiotic }}</strong>  
-                                (MIC: <strong>&nbsp; {{antibiotic_entry.ab_MIC_operand}} {{ antibiotic_entry.ab_MIC_value }}</strong> 
-                                &nbsp;<strong>{{ antibiotic_entry.ab_MIC_enRIS }}</strong>)&nbsp;
-                                <span style="color: red;">{{ antibiotic_entry.ab_MIC_RIS }}</span>&nbsp;
-                                {% if antibiotic_entry.ab_AlertMIC %}
-                                 &nbsp; <strong style="color: red;">Alert:</strong>&nbsp;{{ antibiotic_entry.ab_Alert_val }}
-                                {% endif %}
-                                <br>
-                            {% endif %}
-                           
-                            {% empty %}
-                            No Site Result
-                    {% endfor %}
-                    {% for retest_entry in isolate.antibiotic_entries.all %}
-                    
-                            {% if retest_entry.ab_Retest_DiskValue%}
-                                <strong>{{ retest_entry.ab_Retest_Antibiotic}}</strong>  
-                                (ARS Disk: <strong>{{ retest_entry.ab_Retest_DiskValue }}</strong> 
-                                &nbsp;<strong>{{retest_entry.ab_Retest_Disk_enRIS}}</strong>)
-                                &nbsp;<span style="color: red;">{{retest_entry.ab_Retest_Disk_RIS }}</span>
-                                <br>
-                            {% endif %}
-                            {% if retest_entry.ab_Retest_MICValue %}
-                                <strong>{{ retest_entry.ab_Retest_Antibiotic}}</strong>  
-                                (ARS MIC: <strong>&nbsp; {{retest_entry.ab_Retest_MIC_operand}} {{ retest_entry.ab_Retest_MICValue }}</strong> 
-                                <strong>{{retest_entry.ab_Retest_MIC_enRIS }}</strong> )
-                                &nbsp;<span style="color: red;">{{retest_entry.ab_Retest_MIC_RIS }}</span>
-                                {% if retest_entry.ab_Retest_AlertMIC %}
-                                &nbsp; <strong style="color: red;">Alert:</strong>&nbsp;{{retest_entry.ab_Retest_Alert_val}}
-                                {% endif %}
-                                <br>
-                            {% endif %}
-                            
-                            {% empty %}
-                            &nbsp;&nbsp;&nbsp;No ARS Result
-                            {% endfor %}
-                        
+                  <!-- PATIENT COLUMN -->
+                  <td colspan="2">
+                    <div class="record-info">
+                      <div><strong class="text-primary">Name:</strong> {{ isolate.First_Name }} {{ isolate.Last_Name }}</div>
+                      <div><strong class="text-primary">ID:</strong> {{ isolate.Patient_ID }}</div>
+                      <div><strong class="text-primary">Age:</strong> {{ isolate.Age }}</div>
+                      <div><strong class="text-primary">Sex:</strong> {{ isolate.Sex }}</div>
+                    </div>
                   </td>
-                  
+
+                  <!-- SPECIMEN COLUMN -->
+                  <td colspan="2">
+                    <div class="record-info">
+                      <div><strong class="text-primary">Date:</strong> {{ isolate.Spec_Date }}</div>
+                      <div><strong class="text-primary">Admission:</strong> {{ isolate.Date_Admis }}</div>
+                      <div><strong class="text-primary">Number:</strong> {{ isolate.Spec_Num }}</div>
+                      <div><strong class="text-primary">Type:</strong> {{ isolate.Spec_Type }}</div>
+                    </div>
+                  </td>
+
+                  <!-- DATE COLUMN -->
+                  <td class="text-center">
+                    <small class="text-muted">{{ isolate.Date_of_Entry|date:"M d, Y" }}</small>
+                  </td>
+
+                  <!-- ANTIBIOTICS COLUMN -->
                   <td>
-                    <a href="{%url 'generate_pdf' isolate.id %}" class="text-info"> <i class="fa fa-print" aria-hidden="true"></i> Lab Result </a><span style="display: block; line-height: 8px;"><br></span>
-                    <a href="{% url 'generate_gs' isolate.id %}"  class="text-info"> <i class="fa fa-heartbeat"></i> Gram Stain
-                    </a>
-                  
+                    <div class="antibiotic-results small">
+                      {% for antibiotic_entry in isolate.antibiotic_entries.all %}
+                          {% if antibiotic_entry.ab_Disk_value %}
+                            <div class="result-item">
+                              <strong>{{ antibiotic_entry.ab_Antibiotic }}</strong>
+                              <span class="text-muted">(Disk: {{ antibiotic_entry.ab_Disk_value }} {{ antibiotic_entry.ab_Disk_enRIS }})</span>
+                              <span class="badge badge-danger">{{ antibiotic_entry.ab_Disk_RIS }}</span>
+                            </div>
+                          {% endif %}
+
+                          {% if antibiotic_entry.ab_MIC_value %}
+                            <div class="result-item">
+                              <strong>{{ antibiotic_entry.ab_Antibiotic }}</strong>
+                              <span class="text-muted">(MIC: {{ antibiotic_entry.ab_MIC_operand }} {{ antibiotic_entry.ab_MIC_value }} {{ antibiotic_entry.ab_MIC_enRIS }})</span>
+                              <span class="badge badge-danger">{{ antibiotic_entry.ab_MIC_RIS }}</span>
+                              {% if antibiotic_entry.ab_AlertMIC %}
+                                <span class="badge badge-warning">Alert: {{ antibiotic_entry.ab_Alert_val }}</span>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                      {% empty %}
+                        <small class="text-muted"><em>No Site Result</em></small>
+                      {% endfor %}
+
+                      {% for retest_entry in isolate.antibiotic_entries.all %}
+                          {% if retest_entry.ab_Retest_DiskValue %}
+                            <div class="result-item">
+                              <strong class="text-info">{{ retest_entry.ab_Retest_Antibiotic }}</strong>
+                              <span class="text-muted">(ARS Disk: {{ retest_entry.ab_Retest_DiskValue }} {{ retest_entry.ab_Retest_Disk_enRIS }})</span>
+                              <span class="badge badge-danger">{{ retest_entry.ab_Retest_Disk_RIS }}</span>
+                            </div>
+                          {% endif %}
+
+                          {% if retest_entry.ab_Retest_MICValue %}
+                            <div class="result-item">
+                              <strong class="text-info">{{ retest_entry.ab_Retest_Antibiotic }}</strong>
+                              <span class="text-muted">(ARS MIC: {{ retest_entry.ab_Retest_MIC_operand }} {{ retest_entry.ab_Retest_MICValue }} {{ retest_entry.ab_Retest_MIC_enRIS }})</span>
+                              <span class="badge badge-danger">{{ retest_entry.ab_Retest_MIC_RIS }}</span>
+                              {% if retest_entry.ab_Retest_AlertMIC %}
+                                <span class="badge badge-warning">Alert: {{ retest_entry.ab_Retest_Alert_val }}</span>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                      {% empty %}
+                        <small class="text-muted"><em>No ARS Result</em></small>
+                      {% endfor %}
+                    </div>
                   </td>
+
+                  <!-- PRINT COLUMN -->
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <a href="{% url 'generate_pdf' isolate.id %}" class="btn btn-outline-info" title="Generate Lab Result PDF">
+                        <i class="fa fa-file-pdf"></i>
+                      </a>
+                      <a href="{% url 'generate_gs' isolate.id %}" class="btn btn-outline-success" title="Generate Gram Stain">
+                        <i class="fa fa-microscope"></i>
+                      </a>
+                    </div>
+                  </td>
+
                 </tr>
                 {% endfor %}
-               
-              
+
               </tbody>
+
             </table>
 
-
-
+            {% if not page_obj %}
+            <div class="alert alert-info text-center mt-4">
+              <i class="fas fa-info-circle mr-2"></i>
+              No records found. Try adjusting your search criteria.
+            </div>
+            {% endif %}
           </div>
 
 
-                        <!-- Card footer -->
-          <div class="card-footer py-4">
-            <nav aria-label="...">
-              <ul class="pagination justify-content-center mb-0">
-              <!-- Previous Page -->
-                      {% if page_obj.has_previous %}
-                      <li class="page-item active">
-                        <a class="page-link" href="?page=1" tabindex="-1">
-                          <i class="fas fa-angle-double-left"></i>
-                          <span class="sr-only">First</span>
-                        </a>
-                      </li>
-                      <li class="page-item active">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                          <i class="fas fa-angle-left"></i>
-                          <span class="sr-only">Previous</span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">
-                          <i class="fas fa-angle-double-left"></i>
-                          <span class="sr-only">First</span>
-                        </a>
-                      </li>
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">
-                          <i class="fas fa-angle-left"></i>
-                          <span class="sr-only">Previous</span>
-                        </a>
-                      </li>
-                    {% endif %}
+    <!-- Card Footer with Pagination -->
+    <div class="card-footer py-4 bg-light">
+      <div class="row align-items-center">
+        <!-- Go To Page Form -->
+        <div class="col-md-4">
+          <form method="get" class="form-inline">
+            <label class="mr-2 mb-0 text-primary">Go to page:</label>
+            <input type="number" name="page"
+                   min="1"
+                   max="{{ page_obj.paginator.num_pages }}"
+                   value="{{ page_obj.number }}"
+                   class="form-control form-control-sm mr-2"
+                   style="width: 70px;">
+            <button type="submit" class="btn btn-sm btn-primary">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </form>
+        </div>
 
-                    <!-- Current Page -->
-                    <!-- <li class="page-item active"> -->
-                     <!-- <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p> -->
-                      <!-- <a class="page-link" href="#">{{ page_obj.number }}</a> -->
-                    <!-- </li> -->
+        <!-- Page Info -->
+        <div class="col-md-4 text-center">
+          <span class="text-primary">
+            Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+          </span>
+        </div>
 
+        <!-- Pagination Controls -->
+        <div class="col-md-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end mb-0">
+              <!-- First Page -->
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1" title="First page">
+                    <i class="fas fa-angle-double-left"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                </li>
+              {% endif %}
 
-                    <!-- Next Page -->
-                    {% if page_obj.has_next %}
-                      <li class="page-item active" >
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                          <i class="fas fa-angle-right"></i>
-                          <span class="sr-only">Next</span>
-                        </a>
-                      </li>
-                      <li class="page-item active">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
-                          <i class="fas fa-angle-double-right"></i>
-                          <span class="sr-only">Last</span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#">
-                          <i class="fas fa-angle-right"></i>
-                          <span class="sr-only">Next</span>
-                        </a>
-                      </li>
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#">
-                          <i class="fas fa-angle-double-right"></i>
-                          <span class="sr-only">Last</span>
-                        </a>
-                      </li>
-                    {% endif %}
-                </ul>
-                    <!-- Current Page -->
-                    <div class="d-flex justify-content-center mb-0" style="margin-top: 15px;">
-                      <div class="row ">
-                      <a href="#" style="font-size: small; text-align: center;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
-                      </div>
-                  </div>
-            </nav>
-          </div>
+              <!-- Previous -->
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}" title="Previous page">
+                    <i class="fas fa-angle-left"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                </li>
+              {% endif %}
+
+              <!-- Page Numbers -->
+              {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                  {% if num == page_obj.number %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ num }}</span>
+                    </li>
+                  {% else %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              <!-- Next -->
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}" title="Next page">
+                    <i class="fas fa-angle-right"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                </li>
+              {% endif %}
+
+              <!-- Last Page -->
+              {% if page_obj.number < page_obj.paginator.num_pages %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Last page">
+                    <i class="fas fa-angle-double-right"></i>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
-  
+        </div>
+      </div>
+    </div>
   </div>
-              <!-- DELETE MODAL -->
-              <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header bg-danger">
-                      <h6 class="modal-title text-white" id="deleteModalLabel">
-                        <i class="fa fa-exclamation-triangle mr-2"></i>Delete Confirmation
-                      </h6>
-                      <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">
-                      <h5 style="color: #333;">Are you sure you want to delete this record?</h5>
-                      <p class="text-muted">This action cannot be undone.</p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fa fa-times mr-2"></i>Cancel
-                      </button>
-                      <a id="confirmDeleteBtn" href="#" class="btn btn-danger">
-                        <i class="fa fa-trash mr-2"></i>Delete Record
-                      </a>
+</div>
 
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title" id="deleteModalLabel">
+          <i class="fa fa-exclamation-triangle mr-2"></i>Delete Confirmation
+        </h6>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <h5>Are you sure you want to delete this record?</h5>
+        <p class="text-muted mb-0">
+          <i class="fas fa-info-circle mr-2"></i>
+          This action cannot be undone. All associated data will be permanently removed.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fa fa-times mr-2"></i>Cancel
+        </button>
+        <a id="confirmDeleteBtn" href="#" class="btn btn-danger">
+          <i class="fa fa-trash mr-2"></i>Delete Record
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
 {% block javascripts %}
-
 <script>
-$(document).ready(function(){
-  
-  // ===== SINGLE RECORD DELETE =====
-  $('.delete-btn').on('click', function(e){
-    e.preventDefault();
-    var deleteUrl = $(this).data('url');
-    
-    // Set the href of the confirm button to the delete URL
-    $('#confirmDeleteBtn').attr('href', deleteUrl);
-    
-    // Show the modal
-    $('#deleteModal').modal('show');
+  // Delete button modal
+  $('.delete-btn').on('click', function() {
+    $('#confirmDeleteBtn').attr('href', $(this).data('url'));
   });
 
-  // ===== BATCH DELETE =====
-  $('.batch-delete-btn').on('click', function(e){
-    e.preventDefault();
-    var deleteUrl = $(this).data('url');
-    var batchName = $(this).data('batch-name');
-    
-    // Populate modal with batch info
-    $('#batchName').text(batchName);
-    
-    // Set the href of the confirm button
-    $('#confirmBatchDeleteBtn').attr('href', deleteUrl);
-    
-    // Show the modal
-    $('#deleteBatchModal').modal('show');
-  });
+  // Clear search functionality
+  function clearSearch() {
+    document.getElementById("globalSearch").value = "";
+    document.querySelectorAll(".searchable-row").forEach(r => r.style.display = "");
+    // Optional: Reset the form
+    document.querySelector('form').submit();
+  }
 
-});
-</script>
-
-<!-- Search function -->
-<!-- <script>
-  function searchTable() {
-    var input = document.querySelector("#search-input input");
-    var filter = input.value.toLowerCase();
-    var table = document.querySelector("table");
-    var rows = table.querySelectorAll("tbody tr");
-
+  // Add some styling improvements
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to table rows
+    const rows = document.querySelectorAll('.searchable-row');
     rows.forEach(row => {
-      var text = row.textContent.toLowerCase();
-      row.style.display = text.includes(filter) ? "" : "none";
+      row.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = 'rgba(0, 188, 212, 0.05)';
+      });
+      row.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '';
+      });
     });
-  }
-</script> -->
-
-<script>
-  
-// Global search across all pages (client-side filtering)
-function performGlobalSearch() {
-  var searchInput = document.getElementById('globalSearch');
-  var filter = searchInput.value.toLowerCase();
-  var rows = document.querySelectorAll('.searchable-row');
-  var visibleCount = 0;
-
-  rows.forEach(row => {
-    var searchText = row.getAttribute('data-search-text');
-    var matches = searchText.includes(filter);
-    row.style.display = matches ? '' : 'none';
-    if (matches) visibleCount++;
   });
-
-  // Update search status
-  var statusEl = document.getElementById('searchStatus');
-  if (filter.length > 0) {
-    statusEl.innerHTML = `<span class="results-highlight">${visibleCount}</span> results found`;
-  } else {
-    statusEl.innerHTML = '';
-  }
-}
-
-// Clear search
-function clearSearch() {
-  document.getElementById('globalSearch').value = '';
-  document.getElementById('searchStatus').innerHTML = '';
-  document.querySelectorAll('.searchable-row').forEach(row => {
-    row.style.display = '';
-  });
-}
-
 </script>
 {% endblock javascripts %}

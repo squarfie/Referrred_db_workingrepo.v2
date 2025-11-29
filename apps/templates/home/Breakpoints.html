@@ -5,138 +5,15 @@
 {% block title %}Add / Update Breakpoints{% endblock title %}
 
 {% block stylesheets %}
-<style>
+<link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/headers.css' %}">
 
-.breakpoints-header {
-  background: linear-gradient(135deg, #1a7a8e 0%, #2d9cad 50%, #45b5c6 100%);
-  min-height: 180px;
-  position: relative;
-  overflow: hidden;
-}
-
-.breakpoints-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), 
-                    radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08) 0%, transparent 50%);
-  opacity: 0.6;
-}
-
-.form-card {
-  border-top: 4px solid #2d9cad;
-  box-shadow: 0 4px 12px rgba(29, 156, 173, 0.15);
-}
-
-.form-control-label {
-  color: #1a7a8e;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.form-control {
-  border: 1px solid #d1e8ed;
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: #2d9cad;
-  box-shadow: 0 0 0 0.2rem rgba(45, 156, 173, 0.15);
-}
-
-.section-divider {
-  background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0 1rem 0;
-  border-left: 4px solid #2d9cad;
-}
-
-.checkbox-container {
-  background: linear-gradient(135deg, #f8fcfd 0%, #e8f5f7 100%);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #d1e8ed;
-}
-
-.checkbox-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.checkbox-wrapper input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #2d9cad;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #1a7a8e 0%, #2d9cad 100%);
-  border: none;
-  box-shadow: 0 2px 8px rgba(29, 156, 173, 0.25);
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #155f6f 0%, #247d8f 100%);
-  box-shadow: 0 4px 12px rgba(29, 156, 173, 0.35);
-  transform: translateY(-1px);
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #7ec97e 0%, #5fb85f 100%);
-  border: none;
-  box-shadow: 0 2px 8px rgba(126, 201, 126, 0.25);
-}
-
-.btn-success:hover {
-  background: linear-gradient(135deg, #6ab86a 0%, #4da04d 100%);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  border: none;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #d97c7c 0%, #c24b4b 100%);
-  border: none;
-}
-
-.breakpoint-inputs {
-  background: linear-gradient(135deg, #f8fcfd 0%, #ffffff 100%);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  border: 2px solid #d1e8ed;
-}
-
-.breakpoint-inputs .col-md-3 {
-  position: relative;
-}
-
-.breakpoint-inputs .form-control {
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.breakpoint-label-r { color: #d97c7c; }
-.breakpoint-label-i { color: #e6c86b; }
-.breakpoint-label-sdd { color: #7eb8d4; }
-.breakpoint-label-s { color: #7ec97e; }
-</style>
 {% endblock stylesheets %}
-
 {% block content %}
 
 <!-- Header Section -->
-<div class="breakpoints-header pb-6" style="min-height: 180px; background-size: cover; background-image: url(/static/assets/img/theme/microbial.jpg); background-position: bottom right;">
+<div class="breakpoints-header pb-6">
   <span class="mask bg-gradient-default opacity-5"></span>
   <div class="container-fluid" style="position: relative; z-index: 1;">
     <div class="header-body">

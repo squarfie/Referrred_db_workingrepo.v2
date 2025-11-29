@@ -1,0 +1,197 @@
+/******************************************************
+     SYSTEM SETTINGS (CONFLICT-FREE VERSION)
+     Scope: #settings-page, .settings-page, .settings-container
+******************************************************/
+
+#settings-page,
+.settings-page,
+.settings-container {
+    background: #f5f8fc !important;
+    padding-bottom: 40px;
+}
+
+/******************************************************
+    SIDEBAR
+******************************************************/
+
+#settings-page .settings-sidebar,
+.settings-page .settings-sidebar,
+.settings-container .settings-sidebar {
+    background: #ffffff !important;
+    border: 1px solid #e5e8ef !important;
+    border-radius: 8px !important;
+    padding: 0;
+}
+
+#settings-page .settings-sidebar .list-group-item,
+.settings-container .settings-sidebar .list-group-item {
+    background: #ffffff !important;
+    color: #1a2c45 !important;
+    border: none !important;
+    padding: 14px 18px !important;
+    font-weight: 500;
+    transition: 0.25s ease;
+}
+
+#settings-page .settings-sidebar .list-group-item:hover {
+    background: #f1f6ff !important;
+    color: #1e5a96 !important;
+    padding-left: 25px !important;
+}
+
+#settings-page .settings-sidebar .list-group-item.active {
+    background: linear-gradient(135deg, #1e5a96 0%, #0f3a5f 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-left: 4px solid #00bcd4 !important;
+    padding-left: 20px !important;
+}
+
+/******************************************************
+    TAB CONTENT CONTAINER
+******************************************************/
+
+#settings-page .settings-tab-content,
+.settings-container .settings-tab-content {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    margin-top: 10px;
+    animation: fadein 0.3s ease;
+}
+
+/******************************************************
+    CARDS
+******************************************************/
+
+#settings-page .settings-tab-content .card,
+.settings-container .settings-tab-content .card {
+    background: #ffffff !important;
+    border: 1px solid #e1e6ef !important;
+    border-radius: 8px !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06) !important;
+    margin-bottom: 1.5rem;
+}
+
+#settings-page .settings-tab-content .card-header {
+    background: #f9fbff !important;
+    border-bottom: 1px solid #e1e6ef !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 1.1rem 1.25rem !important;
+    font-weight: 600;
+    color: #1a2c45 !important;
+    font-size: 1.1rem;
+}
+
+/******************************************************
+    FORMS (inputs, selects, textboxes)
+******************************************************/
+
+#settings-page input.form-control,
+#settings-page select.form-control,
+#settings-page textarea.form-control,
+.settings-container input.form-control,
+.settings-container select.form-control,
+.settings-container textarea.form-control {
+    background: #ffffff !important;
+    border: 1px solid #d6deea !important;
+    border-radius: 6px !important;
+    padding: 0.7rem 0.9rem !important;
+    color: #1a2c45 !important;
+    font-size: 0.95rem !important;
+    transition: 0.25s ease !important;
+}
+
+#settings-page input.form-control:focus,
+#settings-page select.form-control:focus,
+.settings-container input.form-control:focus,
+.settings-container select.form-control:focus {
+    border-color: #1e5a96 !important;
+    box-shadow: 0 0 0 0.2rem rgba(30,90,150,0.2) !important;
+}
+
+/******************************************************
+    CHECKBOXES
+******************************************************/
+
+#settings-page .form-check-input,
+.settings-container .form-check-input {
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #c8d3e1 !important;
+    border-radius: 4px !important;
+    cursor: pointer;
+    accent-color: #1e5a96 !important;
+}
+
+#settings-page .form-check-input:checked {
+    background: #1e5a96 !important;
+    border-color: #1e5a96 !important;
+}
+
+#settings-page .form-check-label {
+    color: #1a2c45 !important;
+    font-weight: 500 !important;
+}
+
+/******************************************************
+    TABLES
+******************************************************/
+
+#settings-page table.table,
+.settings-container table.table {
+    background: #ffffff !important;
+    color: #1a2c45 !important;
+}
+
+#settings-page table.table thead th {
+    background: linear-gradient(135deg, #1e5a96 0%, #0f3a5f 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+#settings-page table.table tbody tr:hover {
+    background: rgba(30,90,150,0.06) !important;
+}
+
+/******************************************************
+    MODALS (to avoid conflicts with global modal theme)
+******************************************************/
+
+#settings-page .modal-content,
+.settings-container .modal-content {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid #e1e6ef !important;
+}
+
+#settings-page .modal-header {
+    background: linear-gradient(135deg, #1e5a96 0%, #0f3a5f 100%) !important;
+    color: #ffffff !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+#settings-page .modal-body {
+    color: #1a2c45 !important;
+}
+
+/******************************************************
+    ANIMATIONS
+******************************************************/
+
+@keyframes fadein {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/******************************************************
+    MOBILE BREAKPOINTS
+******************************************************/
+
+@media (max-width: 768px) {
+    #settings-page .settings-sidebar {
+        margin-bottom: 1rem !important;
+    }
+}

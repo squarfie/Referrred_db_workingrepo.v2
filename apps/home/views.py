@@ -47,6 +47,22 @@ from django.db.models import Count, Prefetch, Q
 from django.template.loader import render_to_string
 
 
+@login_required
+def settings_page(request):
+
+    context = {
+        "antibiotic_form": AntibioticsForm(),
+        "organism_form": OrganismForm(),
+        "breakpoint_form": BreakpointsForm(),
+        "sitecode_form": SiteCode_Form(),
+        "specimen_form": SpecimenTypeForm(),
+        "staff_form":ContactForm(),
+        "abx_upload_form": Antibiotics_uploadForm(),
+        'bp_upload_form': Breakpoint_uploadForm(),
+        "editing": False,  # default state
+    }
+
+    return render(request, "home/Settings.html", context)
 
 
 
@@ -114,96 +130,14 @@ def pages(request):
         return redirect('home')  # Redirect to the home view or any other view
 
 
-# @login_required(login_url="/login/")
-# def batch_create_view(request):
-#     """
-#     Unified view for creating a batch, generating codes,
-#     and saving ARSP staff details into Batch_Table and Referred_Data.
-#     Updates existing accession numbers if needed.
-#     """
-#     if request.method == "POST":
-#         form = BatchTable_form(request.POST)
-#         if form.is_valid():
-#             instance = form.save(commit=False)
-
-#             # --- Extract values from javascript ---
-#             site_code = instance.bat_SiteCode or ''  # string like "BGH"
-#             referral_date_obj = instance.bat_Referral_Date
-#             ref_no_raw = instance.bat_RefNo or ''
-#             batch_no = instance.bat_BatchNo or ''
-#             total_batch = instance.bat_Total_batch or ''
-#             site_name = instance.bat_Site_NameGen or ''
-
-#             if not referral_date_obj or not site_code or not ref_no_raw:
-#                 messages.error(request, "Missing required fields.")
-#                 return redirect("batch_create")
-
-#             # --- Generate accession numbers and batch info ---
-#             year_short = referral_date_obj.strftime('%y')
-#             year_long = referral_date_obj.strftime('%m%d%Y')
-
-#             if '-' in ref_no_raw:
-#                 start_ref, end_ref = map(int, ref_no_raw.split('-'))
-#             else:
-#                 start_ref = end_ref = int(ref_no_raw)
-
-#             accession_numbers = [] # List to hold generated accession numbers
-#             for ref in range(start_ref, end_ref + 1):
-#                 padded_ref = str(ref).zfill(4)
-#                 accession_numbers.append(f"{year_short}ARS_{site_code}{padded_ref}")
-
-#             batch_codegen = f"{site_code}_{year_long}_{batch_no}.{total_batch}_{ref_no_raw}"
-#             auto_batch_name = batch_codegen
-
-
-#             if not site_name and site_code:
-#                 site_obj = SiteData.objects.filter(SiteCode=site_code).first()
-#                 if site_obj:
-#                     site_name = site_obj.SiteName
-
-#             # --- Save Batch_Table ---
-#             instance.bat_AccessionNo = ', '.join(accession_numbers)
-#             instance.bat_Batch_Code = batch_codegen
-#             instance.bat_Batch_Name = auto_batch_name
-#             instance.bat_Site_Name = site_name
-#             instance.save()
-
-#             # --- Create or update Referred_Data entries ---
-#             for acc_no in accession_numbers:
-#                 Referred_Data.objects.update_or_create(
-#                     AccessionNo=acc_no,
-#                     defaults={
-#                         "Batch_Code": batch_codegen,
-#                         "Referral_Date": referral_date_obj,
-#                         "RefNo": ref_no_raw,
-#                         "BatchNo": batch_no,
-#                         "Total_batch": total_batch,
-#                         "SiteCode": site_code,
-#                         "Site_Name": site_name,
-#                         "Batch_Name": auto_batch_name,
-#                         "arsp_Encoder": instance.bat_Encoder or '',
-#                         "arsp_Enc_Lic": instance.bat_Enc_Lic or '',
-#                         "arsp_Checker": instance.bat_Checker or '',
-#                         "arsp_Chec_Lic": instance.bat_Chec_Lic or '',
-#                         "arsp_Verifier": instance.bat_Verifier or '',
-#                         "arsp_Ver_Lic": instance.bat_Ver_Lic or '',
-#                         "arsp_LabManager": instance.bat_LabManager or '',
-#                         "arsp_Lab_Lic": instance.bat_Lab_Lic or '',
-#                         "arsp_Head": instance.bat_Head or '',
-#                         "arsp_Head_Lic": instance.bat_Head_Lic or '',
-#                     }
-#                 )
-#             total_records = Referred_Data.objects.filter(Batch_Code=batch_codegen).count()
-#             messages.success(request, f"You have successfully created {total_records} record/s in this batch")
-#             return redirect(f"{reverse('show_batches')}?batch_code={instance.bat_Batch_Code}")
-#         else:
-#             print(form.errors)
-#             messages.error(request, "Invalid data. Please check the form.")
-#     else:
-#         form = BatchTable_form()
-
-#     return render(request, 'home/Batchname_form.html', {'form': form})
-
+@login_required(login_url="/login/")
+def get_antibiotic_name(request):
+    whonet_code = request.GET.get("whonet")
+    try:
+        abx = Antibiotic_List.objects.get(Whonet_Abx=whonet_code)
+        return JsonResponse({"name": abx.Antibiotic})
+    except Antibiotic_List.DoesNotExist:
+        return JsonResponse({"name": ""})
 
 
 @login_required(login_url="/login/")
@@ -498,189 +432,6 @@ def delete_record_in_batch(request, id):
     isolate = get_object_or_404(Referred_Data, pk=id)
     isolate.delete()
     return redirect('show_batches')
-
-
-############## Raw data view
-
-# @login_required(login_url="/login/")
-# def raw_data(request, id):
-#     # --- Fetch antibiotics lists ---
-#     # whonet_abx_data = BreakpointsTable.objects.filter(Show=True)
-#     # whonet_retest_data = BreakpointsTable.objects.filter(Retest=True)
-
-#     # get all show=True antibiotics
-#     whonet_abx_data = BreakpointsTable.objects.filter(Antibiotic_list__Show=True)
-
-#     # get all retest antibiotics
-#     whonet_retest_data = BreakpointsTable.objects.filter(Antibiotic_list__Retest=True)
-
-
-#     # --- Get the isolate record ---
-#     isolates = get_object_or_404(Referred_Data, pk=id)
-
-#     # Fetch all entries in one query
-#     all_entries = AntibioticEntry.objects.filter(ab_idNum_referred=isolates)
-
-#     # Separate them based on the 'retest' condition
-#     existing_entries = all_entries.filter(ab_Abx_code__isnull=False)  # Regular entries
-#     retest_entries = all_entries.filter(ab_Retest_Abx_code__isnull=False)   # Retest entries
-
-    
-
-#     # --- Handle GET request ---
-#     if request.method == "GET":
-#         form = Referred_Form(instance=isolates)
-#         return render(request, "home/Referred_form.html", {
-#             "form": form,
-#             "whonet_abx_data": whonet_abx_data,
-#             "whonet_retest_data": whonet_retest_data,
-#             "edit_mode": True,
-#             "isolates": isolates,
-#             "existing_entries": existing_entries,
-#             "retest_entries": retest_entries,
-
-#         })
-
-#     # --- Handle POST request ---
-#     elif request.method == "POST":
-#         form = Referred_Form(request.POST, instance=isolates)
-
-#         if form.is_valid():
-#             isolates = form.save(commit=False)
-#             isolates.save()
-
-
-
-#             # --- Handle main antibiotics ---
-#             for entry in whonet_abx_data:
-#                 abx_code = (entry.Whonet_Abx or "").strip().upper()
-#                 disk_value = request.POST.get(f"disk_{entry.id}") or ""
-#                 disk_enris = (request.POST.get(f"disk_enris_{entry.id}") or "").strip()
-#                 mic_value = request.POST.get(f"mic_{entry.id}") or ""
-#                 mic_enris = (request.POST.get(f"mic_enris_{entry.id}") or "").strip()
-#                 mic_operand = (request.POST.get(f"mic_operand_{entry.id}") or "").strip()
-#                 alert_mic = f"alert_mic_{entry.id}" in request.POST
-
-#                 try:
-#                     disk_value = int(disk_value) if disk_value.strip() else None
-#                 except ValueError:
-#                     disk_value = None
-
-                
-#                 # Debugging: Print the values before saving
-#                 print(f"Saving values for Antibiotic Entry {entry.id}:", {
-#                     'mic_operand': mic_operand,
-#                     'disk_value': disk_value,
-#                     'disk_enris': disk_enris,
-#                     'mic_value': mic_value,
-#                     'mic_enris': mic_enris,
-#                 })
-
-#                 # Get or update antibiotic entry
-#                 antibiotic_entry, created = AntibioticEntry.objects.update_or_create(
-#                     ab_idNum_referred=isolates,
-#                     ab_Abx_code=abx_code,
-#                     defaults={
-#                         "ab_AccessionNo": isolates.AccessionNo,
-#                         "ab_Antibiotic": entry.Antibiotic,
-#                         "ab_Abx": entry.Abx_code,
-#                         "ab_Disk_value": disk_value,
-#                         "ab_Disk_enRIS": disk_enris,
-#                         "ab_MIC_value": mic_value or None,
-#                         "ab_MIC_enRIS": mic_enris,
-#                         "ab_MIC_operand": mic_operand,
-#                         "ab_R_breakpoint": entry.R_val or None,
-#                         "ab_I_breakpoint": entry.I_val or None,
-#                         "ab_SDD_breakpoint": entry.SDD_val or None,
-#                         "ab_S_breakpoint": entry.S_val or None,
-#                         "ab_AlertMIC": alert_mic,
-#                         "ab_Alert_val": entry.Alert_val if alert_mic else '',
-#                     }
-#                 )
-
-#                 antibiotic_entry.ab_breakpoints_id.set([entry])
-
-#             # Separate loop for Retest Data
-#             for retest in whonet_retest_data:
-#                 retest_abx_code = retest.Whonet_Abx
-
-#                 # Fetch user input values for MIC and Disk
-#                 if retest.Disk_Abx:
-#                     retest_disk_value = request.POST.get(f'retest_disk_{retest.id}')
-#                     retest_disk_enris = request.POST.get(f"retest_disk_enris_{retest.id}") or ""
-#                     retest_mic_value = ''
-#                     retest_mic_enris = ''
-#                     retest_mic_operand = ''
-#                     retest_alert_mic = False
-#                 else:
-#                     retest_mic_value = request.POST.get(f'retest_mic_{retest.id}')
-#                     retest_mic_enris = request.POST.get(f"retest_mic_enris_{retest.id}") or ""
-#                     retest_mic_operand = request.POST.get(f'retest_mic_operand_{retest.id}')
-#                     retest_alert_mic = f'retest_alert_mic_{retest.id}' in request.POST
-#                     retest_disk_value = ''
-#                     retest_disk_enris = ''
-
-#                 # Check and update retest mic_operand if needed
-#                 retest_disk_enris = (retest_disk_enris or '').strip() # Ensure it's a string and strip whitespace
-#                 retest_mic_enris = (retest_mic_enris or '').strip()
-#                 retest_mic_operand = (retest_mic_operand or '').strip()
-                
-#                 # Convert `retest_disk_value` safely
-#                 retest_disk_value = int(retest_disk_value) if retest_disk_value and retest_disk_value.strip().isdigit() else None
-
-#                 # Debugging: Print the values before saving
-#                 print(f"Saving values for Retest Entry {retest.id}:", {
-#                     'retest_mic_operand': retest_mic_operand,
-#                     'retest_disk_value': retest_disk_value,
-#                     'retest_disk_enris': retest_disk_enris,
-#                     'retest_mic_value': retest_mic_value,
-#                     'retest_mic_enris': retest_mic_enris,
-#                     'retest_alert_mic': retest_alert_mic,
-#                     'retest_alert_val': retest.Alert_val if retest_alert_mic else '',
-#                 })
-
-#                 # Get or update retest antibiotic entry
-#                 retest_entry, created = AntibioticEntry.objects.update_or_create(
-#                     ab_idNum_referred=isolates,
-#                     ab_Retest_Abx_code=retest_abx_code,
-#                     defaults={
-#                         "ab_Retest_DiskValue": retest_disk_value,
-#                         "ab_Retest_Disk_enRIS": retest_disk_enris,
-#                         "ab_Retest_MICValue": retest_mic_value or None,
-#                         "ab_Retest_MIC_enRIS": retest_mic_enris,
-#                         "ab_Retest_MIC_operand": retest_mic_operand,
-#                         "ab_Retest_Antibiotic": retest.Antibiotic,
-#                         "ab_Retest_Abx": retest.Abx_code,
-#                         "ab_Ret_R_breakpoint": retest.R_val or None,
-#                         "ab_Ret_S_breakpoint": retest.S_val or None,
-#                         "ab_Ret_SDD_breakpoint": retest.SDD_val or None,
-#                         "ab_Ret_I_breakpoint": retest.I_val or None,
-#                         "ab_Retest_AlertMIC": retest_alert_mic,
-#                         "ab_Retest_Alert_val": retest.Alert_val if retest_alert_mic else "",
-#                     }
-#                 )
-
-#                 retest_entry.ab_breakpoints_id.set([retest])
-
-#             messages.success(request, "Data saved successfully.")
-#             return redirect("show_data")
-#         else:
-#             messages.error(request, "Error: Saving unsuccessful")
-#             print(form.errors)
-
-#     # --- fallback GET render in case POST fails ---
-#     form = Referred_Form(instance=isolates)
-#     existing_entries = AntibioticEntry.objects.filter(ab_idNum_referred=isolates)
-#     return render(request, "home/Referred_form.html", {
-#         "form": form,
-#         "whonet_abx_data": whonet_abx_data,
-#         "whonet_retest_data": whonet_retest_data,
-#         "edit_mode": True,
-#         "isolates": isolates,
-#         "existing_entries": existing_entries,
-#         "retest_entries": retest_entries,
-
-#     })
 
 
 
@@ -1546,27 +1297,27 @@ def get_clinic_code(request):
 @login_required(login_url="/login/")
 def add_breakpoints(request, pk=None):
     breakpoint = None  # Initialize breakpoint to avoid UnboundLocalError
-    upload_form = Breakpoint_uploadForm()
+    bp_upload_form = Breakpoint_uploadForm()
 
     if pk:  # Editing an existing breakpoint
         breakpoint = get_object_or_404(BreakpointsTable, pk=pk)
-        form = BreakpointsForm(request.POST or None, instance=breakpoint)
+        breakpoint_form = BreakpointsForm(request.POST or None, instance=breakpoint)
         editing = True
     else:  # Adding a new breakpoint
-        form = BreakpointsForm(request.POST or None)
+        breakpoint_form = BreakpointsForm(request.POST or None)
         editing = False
 
     if request.method == "POST":
-        if form.is_valid():
-            form.save()
+        if breakpoint_form.is_valid():
+            breakpoint_form.save()
             messages.success(request, "Update Successful")
             return redirect('breakpoints_view')  # Redirect to avoid form resubmission
 
     return render(request, 'home/Breakpoints.html', {
-        'form': form,
+        'form': breakpoint_form,
         'editing': editing,  # Pass editing flag to template
         'breakpoint': breakpoint,  # Pass breakpoint even if None
-        'upload_form': upload_form,
+        'bp_upload_form': bp_upload_form,
     })
 
 
@@ -1685,9 +1436,9 @@ def upload_breakpoints(request):
     Does NOT create or update Antibiotic_List records.
     """
     if request.method == "POST":
-        upload_form = Breakpoint_uploadForm(request.POST, request.FILES)
-        if upload_form.is_valid():
-            uploaded_file = upload_form.save()
+        bp_upload_form = Breakpoint_uploadForm(request.POST, request.FILES)
+        if bp_upload_form.is_valid():
+            uploaded_file = bp_upload_form.save()
             file = uploaded_file.File_uploadBP
             print("Uploaded file:", file)
 
@@ -3508,21 +3259,21 @@ def add_antibiotics(request, pk=None):
     - Otherwise: add new
     """
     antibiotic = None
-    upload_form = Antibiotics_uploadForm()
+    abx_upload_form = Antibiotics_uploadForm()
 
     # --- Determine form mode ---
     if pk:
         antibiotic = get_object_or_404(Antibiotic_List, pk=pk)
-        form = AntibioticsForm(request.POST or None, instance=antibiotic)
+        antibiotic_form = AntibioticsForm(request.POST or None, instance=antibiotic)
         editing = True
     else:
-        form = AntibioticsForm(request.POST or None)
+        antibiotic_form = AntibioticsForm(request.POST or None)
         editing = False
 
     # --- Handle POST ---
     if request.method == "POST":
-        if form.is_valid():
-            saved_antibiotic = form.save(commit=False)
+        if antibiotic_form.is_valid():
+            saved_antibiotic = antibiotic_form.save(commit=False)
             saved_antibiotic.save()
             if editing:
                 messages.success(request, f"Antibiotic '{saved_antibiotic.Antibiotic}' updated successfully.")
@@ -3533,11 +3284,11 @@ def add_antibiotics(request, pk=None):
             messages.error(request, "Form validation failed. Please check your inputs.")
 
     # --- Render template ---
-    return render(request, 'home/Antibiotic_list.html', {
-        'form': form,
+    return render(request, 'settings/tabs/antibiotics_tab.html', {
+        'form':  antibiotic_form,
         'editing': editing,
         'antibiotic': antibiotic,
-        'upload_form': upload_form,
+        'abx_upload_form': abx_upload_form,
     })
 
 
@@ -3565,10 +3316,10 @@ def antibiotics_del(request, id):
 # for uploading and replacing existing breakpoints data
 def upload_antibiotics(request):
     if request.method == "POST":
-        upload_form = Antibiotics_uploadForm(request.POST, request.FILES)
-        if upload_form.is_valid():
+        abx_upload_form = Antibiotics_uploadForm(request.POST, request.FILES)
+        if abx_upload_form.is_valid():
             # Save the uploaded file instance
-            uploaded_file = upload_form.save()
+            uploaded_file = abx_upload_form.save()
             file = uploaded_file.File_uploadAbx  # Get the actual file field
             print("Uploaded file:", file)  # Debugging statement
             try:
@@ -3639,9 +3390,9 @@ def upload_antibiotics(request):
             messages.error(request, messages.INFO, "Form is not valid.")
 
     else:
-        upload_form = Antibiotics_uploadForm()
+        abx_upload_form = Antibiotics_uploadForm()
 
-    return render(request, 'home/Antibiotic_list.html', {'upload_form': upload_form})
+    return render(request, 'settings.html', {'abx_upload_form': abx_upload_form})
 
 
 

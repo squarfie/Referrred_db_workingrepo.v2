@@ -115,7 +115,7 @@
           </tr>
         </thead>
         <tbody class="list">
-          {% for breakpoint in breakpoints|multi_sort:"Antibiotic,Whonet_Abx" %}
+          {% for breakpoint in page_obj|multi_sort:"Antibiotic,Whonet_Abx" %}
           <tr style="transition: all 0.2s ease;">
             <td style="white-space: nowrap;">
               <a href="{% url 'edit_breakpoints' pk=breakpoint.pk %}" class="btn btn-sm mr-1" style="background: linear-gradient(135deg, #7ec97e 0%, #5fb85f 100%); color: white; border: none;" title="Edit">

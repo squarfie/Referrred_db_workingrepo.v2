@@ -1,9 +1,15 @@
 {% extends 'layouts/base.html' %}
-{% load custom_filters %}
-{% block title %} View All Antibiotic Entries {% endblock title %}
+{% load static %} 
+{% load widget_tweaks %}
 
-<!-- Specific CSS goes HERE -->
+{% block title %}View Antibiotic Entries{% endblock title %}
+
 {% block stylesheets %}
+
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+
+
 {% endblock stylesheets %}
 
 {% block content %}

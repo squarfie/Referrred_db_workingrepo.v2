@@ -86,11 +86,12 @@ urlpatterns = [
     path("field-mapper-tool/", views.field_mapper_tool, name="field_mapper_tool"),
     path("generate-mapped-excel/", views.generate_mapped_excel, name="generate_mapped_excel"),
     path("clear-mappings/", views.clear_mappings, name="clear_mappings"),
-    
+    path("ajax/get-antibiotic-name/", views.get_antibiotic_name, name="get_antibiotic_name"),
+
     #include all app's urls
     path('upload/', include('apps.wgs_app.urls')),
     path('final/', include('apps.home_final.urls')),
-
+    path("settings/", views.settings_page, name="settings_page"),
     # path('batch/', views.show_accession, name="show_accession"),
  
 

@@ -15,10 +15,7 @@
  word-spacing: 2.7px;
  color: navy;
 }
- .sidenav-font {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5
-        }
+ 
 </style>
 <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white sidenav-font" id="sidenav-main" style="z-index: 99999;">
   <div class="scrollbar-inner">
@@ -120,74 +117,25 @@
         </h6>
            </div>
 
-           <ul class="navbar-nav mb-md-3">
-            <li class="nav-item">
-            <a class="nav-link" 
-               href="#">
-              <i class="ni ni-spaceship text-info"></i>
-              <span class="nav-link-text ">Organism</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_antibiotics' %}">
-              <i class="ni ni-spaceship text-info"></i>
-              <span class="nav-link-text ">Antibiotics</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_breakpoints' %}">
-              <i class="ni ni-spaceship text-info"></i>
-              <span class="nav-link-text ">Breakpoints</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_dropdown' %}">
-              <i class="ni ni-ambulance text-info"></i>
-              <span class="nav-link-text ">Site Code</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_specimen' %}">
-              <i class="ni ni-tag text-info"></i>
-              <span class="nav-link-text ">Specimen Code</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_contact' %}">
-              <i class="ni ni-single-02 text-info"></i>
-              <span class="nav-link-text ">ARSP Staff</span>
-            </a>
-          </li>
-          <!-- <li class="nav-item">
-            <a class="nav-link" 
-               href="{% url 'add_location' %}">
-              <i class="ni ni-square-pin text-info"></i>
-              <span class="nav-link-text ">Add Cities</span>
-            </a>
-          </li> -->
+            <ul class="navbar-nav mb-md-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'settings_page' %}">
+                        <i class="fa fa-cogs text-info"></i>
+                        <span class="nav-link-text">System Settings</span>
+                    </a>
+                </li>
+                                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_breakpoints' %}">
+                        <i class="fa fa-cogs text-info"></i>
+                        <span class="nav-link-text">Breakpoints</span>
+                    </a>
+                                        <a class="nav-link" href="{% url 'add_antibiotics' %}">
+                        <i class="fa fa-cogs text-info"></i>
+                        <span class="nav-link-text">Antibiotics</span>
+                    </a>
+                </li>
+            </ul>
 
-          <li class="nav-item">
-            <a class="nav-link" 
-               href="#">
-              <i class="ni ni-square-pin text-info"></i>
-              <span class="nav-link-text ">TAT Process</span>
-            </a>
-          </li>
-       
-          <!-- <li class="nav-item">
-            <a class="nav-link active active-pro" 
-               target="_blank" 
-               href="https://arsp.com.ph/">
-              <i class="ni ni-send text-dark"></i>
-              <span class="nav-link-text">ARSP-WEBSITE</span>
-            </a>
-          </li> -->
-        </ul>
       </div>
     </div>
   </div>
@@ -233,7 +181,7 @@
                       <div class="col-lg-12">
                       <div class="row">
                         <div class="col-lg-4">
-                            <label class='form-control-label'>Consult Date:</label>
+                            <label class='form-control-label'>Specimen Date:</label>
                         </div>
                         <div class="col-lg-8">
                             <div class="row">

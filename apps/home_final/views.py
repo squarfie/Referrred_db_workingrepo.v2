@@ -1582,65 +1582,62 @@ def show_final_antibiotic(request):
 
     for entry in entries:
 
-        acc = entry.ab_idNum_f_referred.f_AccessionNo
-        full_code = entry.ab_Abx_code.upper()     # e.g., AMK_NM or AMK_ND30
+        # Skip entries with missing code
+        if not entry.ab_Abx_code:
+            continue
 
-        # Determine MIC vs DISK
+        acc = entry.ab_idNum_f_referred.f_AccessionNo
+        full_code = entry.ab_Abx_code.upper()     # Safe now
+
+        # MIC or DISK detection
         is_mic = full_code.endswith("_NM")
         is_disk = "ND" in full_code
 
-        # Build final column identifiers
+        # Build column names
         col_value = full_code
         col_op    = f"{full_code}_OP"
         col_ris   = f"{full_code}_RIS"
 
-        # Register columns for header
         abx_columns.update([col_value, col_op, col_ris])
 
-        # Ensure accession dict exists
         if acc not in abx_data:
             abx_data[acc] = {"item_id": entry.id}
 
-        # Assign numeric value
+        # Save numeric value
         abx_data[acc][col_value] = (
             entry.ab_MIC_value if is_mic else entry.ab_Disk_value
         ) or ""
 
-        # Assign operand
+        # Save operand
         abx_data[acc][col_op] = (
             entry.ab_MIC_operand if is_mic else ""
         ) or ""
 
-        # Assign RIS
+        # Save RIS result
         abx_data[acc][col_ris] = (
             entry.ab_MIC_enRIS if is_mic else entry.ab_Disk_enRIS
         ) or ""
 
-    # Sort antibiotic columns alphabetically
+    # Sort antibiotic columns
     abx_columns = sorted(abx_columns)
 
-    # Convert dictionary to list ONLY for pagination
-    paginated_list = list(abx_data.items())   # → [ (acc, dict), ... ]
-
-    # Pagination
+    # Paginate
+    paginated_list = list(abx_data.items())
     paginator = Paginator(paginated_list, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-
-    # Debug output
-    print("COLUMNS:", abx_columns[:20])
-    print("FIRST ROW:", page_obj.object_list[0] if page_obj.object_list else "NO DATA")
 
     return render(
         request,
         "wgs_app/show_final_antibiotic.html",
         {
             "page_obj": page_obj,
-            "abx_data": dict(page_obj.object_list),   # <-- FIXED!!! DICT RESTORED
+            "abx_data": dict(page_obj.object_list),
             "abx_codes": abx_columns,
             "total_records": len(entries),
         }
     )
+
 
 
 

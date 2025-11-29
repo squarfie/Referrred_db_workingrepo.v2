@@ -1,6 +1,14 @@
 {% extends 'layouts/base.html' %}
+{% load static %} 
+{% load widget_tweaks %}
 
-{% block title %} Tables {% endblock title %}
+{% block title %}View Batch Isolates{% endblock title %}
+
+{% block stylesheets %}
+
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
 <style>
     /* Make icons align perfectly left with consistent spacing */
 td a i {
@@ -29,6 +37,7 @@ td a:hover {
 
 </style>
 
+{% endblock stylesheets %}
 
 {% block content %}
 

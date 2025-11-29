@@ -1,127 +1,116 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 {% load widget_tweaks %}
 {% load custom_filters %}
 
 {% block title %} Create Batch {% endblock title %}
 
 {% block stylesheets %}
-<style>
-  #myBtn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999;
-  display: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s;
-}
-
-#myBtn:hover {
-  background-color: #166b77;
-}
-</style>
+  <link rel="stylesheet" href="{% static 'assets/css/arsp.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/header.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/settings.css' %}">
 {% endblock stylesheets %}
 
 {% block content %}
 <!-- Animated Header -->
 <div class="header-container">
-       <div class="background-animation-wrapper" aria-hidden="true">
+  <div class="background-animation-wrapper" aria-hidden="true">
+    <!-- Grid Background -->
+    <div class="grid-bg"></div>
 
-      <!-- Grid Background -->
-      <div class="grid-bg"></div>
+    <!-- Rising Particles -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
 
-      <!-- Rising Particles -->
-      <div class="particles">
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-      </div>
+    <!-- Scanners -->
+    <div class="scanner"></div>
+    <div class="scanner"></div>
+    <div class="scanner"></div>
 
-      <!-- Scanners -->
-      <div class="scanner"></div>
-      <div class="scanner"></div>
-      <div class="scanner"></div>
+    <!-- Glow Orbs -->
+    <div class="glow-orb"></div>
+    <div class="glow-orb"></div>
 
-      <!-- Glow Orbs -->
-      <div class="glow-orb" ></div>
-      <div class="glow-orb" ></div>
-
-      <!-- Gradient Overlay -->
-      <div class="overlay"></div>
-
+    <!-- Gradient Overlay -->
+    <div class="overlay"></div>
   </div>
 
-
-  <!-- Header content -->
-<div class="container-fluid">
-    <div class="header-body">
-      <div class="row align-items-center py-4">
-        <div class="col-lg-8 col-12">
-          <h2 class="text-white d-inline-block mb-2">
-            <i class="fas fa-database mr-2"></i>Batch Form
-          </h2>
-          <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
-            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-              <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
-              <li class="breadcrumb-item active" aria-current="page">Create Batch</li>
-            </ol>
-          </nav>
-        </div>
-      </div>
+  <!-- Header Content -->
+  <div class="header-content">
+    <h1 style="color: aliceblue;"><i class="fas fa-database mr-3" style="color: aliceblue;"></i>Batch Form</h1>
+    <p>Create new records </p>
+    <div class="badge-group">
+      <span class="badge">
+        <i class="badge-icon fas fa-info-circle"></i>
+        Data Management
+      </span>
+      <span class="badge">
+        <i class="badge-icon fas fa-clipboard-check"></i>
+        Automated
+      </span>
     </div>
   </div>
 </div>
 
-<!-- Main content -->
-<div class="container-fluid mt--6" >
+<!-- Main Content -->
+<div class="container-fluid mt-5">
   <div class="row justify-content-center">
     <div class="col-lg-11 col-md-12">
-      <!-- Batch form card -->
-      <div class="card shadow border-0 mb-4" 
-           style="background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%); box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
-        <div class="card-header bg-gradient-primary text-white">
-          <h4 class="mb-0" style="color: white;"><i class="ni ni-single-02 mr-2"></i>Create New Batch</h4>
+      <!-- Batch Form Card -->
+      <div class="form-card">
+        <div class="card-header">
+          <h4 class="mb-0">
+            <i class="ni ni-single-02 mr-2"></i>Create New Batch
+          </h4>
         </div>
 
-        <div class="card-body" style="padding: 2.5rem;">
-          <form method="POST" action="{% url 'batch_create_view' %}" id="accession-form">
+        <div class="card-body">
+          <form method="POST" action="{% url 'batch_create_view' %}" id="accession-form" novalidate>
             {% csrf_token %}
 
-            <!-- Overwrite confirmation -->
+            <!-- Overwrite Confirmation Alert -->
             {% if confirm_overwrite %}
               <div class="alert alert-warning">
-                <strong> <i class="fa fa-exclamation-triangle text-info" aria-hidden="true"></i>&nbsp; Batch already exists.</strong> Confirm overwrite to replace it.
+                <i class="fa fa-exclamation-triangle mr-2"></i>
+                <strong>Batch already exists.</strong> Confirm overwrite to replace it.
               </div>
               <input type="hidden" name="confirm_overwrite" value="true">
             {% endif %}
+
+            <!-- Section: Site Information -->
+            <div class="section-divider">Site Information</div>
+
             <!-- Row 1: Site Code, Referral Date, Batch No, Total Batch -->
             <div class="form-row">
               <div class="form-group col-md-3">
-                <div class="d-flex align-items-center mb-1">
-                  <label class="form-control-label me-2 mb-0">Site Code</label>
-                  <a href="{% url 'add_dropdown' %}" class="shortcut-item" style="padding: 0;">
-                    <i class="ni ni-settings" style="font-size: 0.9rem; line-height: 1; margin-left: 8px;"></i>
+                <div class="d-flex align-items-center mb-2">
+                  <label class="form-control-label mb-0">Site Code</label>
+                  <a href="{% url 'add_dropdown' %}" class="shortcut-item ml-2" title="Manage site codes">
+                    <i class="ni ni-settings" style="font-size: 0.85rem;"></i>
                   </a>
                 </div>
-                {{ form.bat_SiteCode|append_attr:"class: form-control rounded-pill mt-1" }}
+                {{ form.bat_SiteCode|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">Referral Date</label>
-                {{ form.bat_Referral_Date|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Referral_Date|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">Batch No</label>
-                {{ form.bat_BatchNo|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_BatchNo|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">Total Batch</label>
-                {{ form.bat_Total_batch|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Total_batch|append_attr:"class: form-control" }}
               </div>
             </div>
 
@@ -129,35 +118,38 @@
             <div class="form-row">
               <div class="form-group col-md-4">
                 <label class="form-control-label">Reference No</label>
-                {{ form.bat_RefNo|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_RefNo|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-4">
                 <label class="form-control-label">Site Name</label>
-                {{ form.bat_Site_NameGen|append_attr:"class: form-control bg-light font-weight-bold rounded-pill" }}
+                {{ form.bat_Site_NameGen|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-4">
                 <label class="form-control-label">Batch Name</label>
-                {{ form.bat_Batch_Name|append_attr:"class: form-control bg-light font-weight-bold rounded-pill" }}
+                {{ form.bat_Batch_Name|append_attr:"class: form-control" }}
               </div>
             </div>
+
+            <!-- Section: Personnel Information -->
+            <div class="section-divider">Personnel Information</div>
 
             <!-- Encoder Row -->
             <div class="form-row">
               <div class="form-group col-md-3">
                 <label class="form-control-label">Encoded by</label>
-                {{ form.bat_Encoder|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Encoder|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">License No.</label>
-                {{ form.bat_Enc_Lic|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Enc_Lic|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">Edited by</label>
-                {{ form.bat_Checker|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Checker|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">License No.</label>
-                {{ form.bat_Chec_Lic|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Chec_Lic|append_attr:"class: form-control" }}
               </div>
             </div>
 
@@ -165,19 +157,19 @@
             <div class="form-row">
               <div class="form-group col-md-3">
                 <label class="form-control-label">Verified by</label>
-                {{ form.bat_Verifier|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Verifier|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">License No.</label>
-                {{ form.bat_Ver_Lic|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Ver_Lic|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">Validated by</label>
-                {{ form.bat_LabManager|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_LabManager|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-3">
                 <label class="form-control-label">License No.</label>
-                {{ form.bat_Lab_Lic|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Lab_Lic|append_attr:"class: form-control" }}
               </div>
             </div>
 
@@ -185,154 +177,154 @@
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label class="form-control-label">ARSP Head</label>
-                {{ form.bat_Head|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Head|append_attr:"class: form-control" }}
               </div>
               <div class="form-group col-md-6">
                 <label class="form-control-label">License No.</label>
-                {{ form.bat_Head_Lic|append_attr:"class: form-control rounded-pill" }}
+                {{ form.bat_Head_Lic|append_attr:"class: form-control" }}
               </div>
             </div>
 
-            <!-- Action buttons -->
-            <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-3 mt-5 flex-wrap">
               {% if confirm_overwrite %}
-                <button type="submit" class="btn btn-danger btn-lg rounded-pill">
+                <button type="submit" class="btn btn-danger btn-lg">
                   <i class="fa fa-trash mr-2"></i>Confirm Overwrite
                 </button>
-                <a href="{% url 'show_batches' %}" class="btn btn-secondary btn-lg rounded-pill">
-                  Cancel
+                <a href="{% url 'show_batches' %}" class="btn btn-secondary btn-lg">
+                  <i class="fas fa-times mr-2"></i>Cancel
                 </a>
               {% else %}
-                <button type="submit" class="btn btn-info btn-lg rounded-pill">
+                <button type="submit" class="btn btn-primary btn-lg">
                   <i class="ni ni-fat-add mr-2"></i>Save Batch
                 </button>
               {% endif %}
-              <button type="button" class="btn btn-success btn-lg rounded-pill" onclick="refresh()">
+              <button type="button" class="btn btn-secondary btn-lg" onclick="refresh()">
                 <i class="ni ni-bell-55 mr-2"></i>Refresh
               </button>
-              <a href="{% url 'show_batches' %}" class="btn btn-primary btn-lg rounded-pill">
-                <i class="ni ni-bullet-list-67 mr-2"></i>View Last Batch
+              <a href="{% url 'show_batches' %}" class="btn btn-primary btn-lg">
+                <i class="ni ni-bullet-list-67 mr-2"></i>View Batches
               </a>
             </div>
           </form>
         </div>
       </div>
-
-
     </div>
   </div>
+
+  <!-- Back to Top Button -->
+<div class="d-flex justify-content-end mt-5">
+  <button type="button" onclick="topFunction()" id="myBtn"
+          class="btn btn-primary btn-sm">
+    <i class="fas fa-arrow-up mr-2"></i>Back to Top
+  </button>
 </div>
-      <!-- Back to top button -->
-      <div class="col-12 text-left mt-4">
-        <button type="button" onclick="topFunction()" id="myBtn" title="Back to top" 
-                class="btn btn-sm btn-primary rounded-pill">
-          <i class="fas fa-arrow-up mr-2"></i>Back to Top
-        </button>
-      </div>
+
+
 {% endblock content %}
 
 {% block javascripts %}
 <script>
-// Scroll to top functionality
-const mybutton = document.getElementById("myBtn");
-window.onscroll = function() { 
-  mybutton.style.display = (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) ? "block" : "none";
-};
+  // Scroll to top functionality
+  const mybutton = document.getElementById("myBtn");
+  window.onscroll = function() {
+    mybutton.style.display = (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) ? "block" : "none";
+  };
 
-function topFunction() {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-}
-
-// Auto-fill site name + batch name
-$(document).ready(function() {
-  var $siteCode = $('#id_bat_SiteCode'),
-      $refDate = $('#id_bat_Referral_Date'),
-      $batchNum = $('#id_bat_BatchNo'),
-      $refNo = $('#id_bat_RefNo'),
-      $totalBatch = $('#id_bat_Total_batch'),
-      $siteNameGen = $('#id_bat_Site_NameGen'),
-      $batchName = $('#id_bat_Batch_Name');
-
-  function debounce(func, wait) {
-    var timeout;
-    return function() {
-      clearTimeout(timeout);
-      timeout = setTimeout(func, wait);
-    };
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
   }
 
-  function generateBatchName() {
-    var site = $siteCode.val(),
-        dateVal = $refDate.val(),
-        batch = $batchNum.val(),
-        ref = $refNo.val(),
-        total = $totalBatch.val();
+  // Auto-fill site name + batch name
+  $(document).ready(function() {
+    var $siteCode = $('#id_bat_SiteCode'),
+        $refDate = $('#id_bat_Referral_Date'),
+        $batchNum = $('#id_bat_BatchNo'),
+        $refNo = $('#id_bat_RefNo'),
+        $totalBatch = $('#id_bat_Total_batch'),
+        $siteNameGen = $('#id_bat_Site_NameGen'),
+        $batchName = $('#id_bat_Batch_Name');
 
-    if (site && dateVal && batch && total && ref) {
-      var parts = dateVal.split('-');
-      var dateClean = parts[1] + parts[2] + parts[0];
-      $batchName.val(site + '_' + dateClean + '_' + batch + '.' + total + '_' + ref);
-    } else {
-      $batchName.val('');
+    function debounce(func, wait) {
+      var timeout;
+      return function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(func, wait);
+      };
     }
-  }
 
-  var debouncedGenerateBatchName = debounce(generateBatchName, 300);
+    function generateBatchName() {
+      var site = $siteCode.val(),
+          dateVal = $refDate.val(),
+          batch = $batchNum.val(),
+          ref = $refNo.val(),
+          total = $totalBatch.val();
 
-  $siteCode.change(function() {
-    var site = $(this).val();
-    if (site) {
-      $.ajax({
-        url: "{% url 'get_clinic_code' %}",
-        data: { site_code: site },
-        dataType: 'json',
-        success: function(data) {
-          $siteNameGen.val(data.site_name);
-          generateBatchName();
-        }
-      });
-    } else {
-      $siteNameGen.val('');
-      $batchName.val('');
+      if (site && dateVal && batch && total && ref) {
+        var parts = dateVal.split('-');
+        var dateClean = parts[1] + parts[2] + parts[0];
+        $batchName.val(site + '_' + dateClean + '_' + batch + '.' + total + '_' + ref);
+      } else {
+        $batchName.val('');
+      }
     }
-  });
 
-  $('#id_bat_RefNo, #id_bat_Referral_Date, #id_bat_BatchNo, #id_bat_Total_batch').on('input change', debouncedGenerateBatchName);
-});
+    var debouncedGenerateBatchName = debounce(generateBatchName, 300);
 
-// Refresh form
-function refresh() {
-  document.getElementById('accession-form').reset();
-}
-
-// Auto-fill license numbers
-$(document).ready(function() {
-  function bindStaffField(staffSelector, licenseSelector, licenseKey) {
-    $(staffSelector).change(function() {
-      var staffId = $(this).val();
-      if (staffId) {
+    $siteCode.change(function() {
+      var site = $(this).val();
+      if (site) {
         $.ajax({
-          url: "{% url 'get_ars_staff_details' %}",
-          data: { ars_staff_id: staffId, license_field: licenseKey },
+          url: "{% url 'get_clinic_code' %}",
+          data: { site_code: site },
           dataType: 'json',
           success: function(data) {
-            if (data[licenseKey]) {
-              $(licenseSelector).val(data[licenseKey]);
-            }
+            $siteNameGen.val(data.site_name);
+            generateBatchName();
           }
         });
       } else {
-        $(licenseSelector).val('');
+        $siteNameGen.val('');
+        $batchName.val('');
       }
     });
+
+    $('#id_bat_RefNo, #id_bat_Referral_Date, #id_bat_BatchNo, #id_bat_Total_batch').on('input change', debouncedGenerateBatchName);
+  });
+
+  // Refresh form
+  function refresh() {
+    document.getElementById('accession-form').reset();
   }
 
-  bindStaffField('#id_bat_Encoder',     '#id_bat_Enc_Lic',  'bat_Enc_Lic');
-  bindStaffField('#id_bat_Checker',     '#id_bat_Chec_Lic', 'bat_Chec_Lic');
-  bindStaffField('#id_bat_Verifier',    '#id_bat_Ver_Lic',  'bat_Ver_Lic');
-  bindStaffField('#id_bat_LabManager',  '#id_bat_Lab_Lic',  'bat_Lab_Lic');
-  bindStaffField('#id_bat_Head',        '#id_bat_Head_Lic', 'bat_Head_Lic');
-});
+  // Auto-fill license numbers
+  $(document).ready(function() {
+    function bindStaffField(staffSelector, licenseSelector, licenseKey) {
+      $(staffSelector).change(function() {
+        var staffId = $(this).val();
+        if (staffId) {
+          $.ajax({
+            url: "{% url 'get_ars_staff_details' %}",
+            data: { ars_staff_id: staffId, license_field: licenseKey },
+            dataType: 'json',
+            success: function(data) {
+              if (data[licenseKey]) {
+                $(licenseSelector).val(data[licenseKey]);
+              }
+            }
+          });
+        } else {
+          $(licenseSelector).val('');
+        }
+      });
+    }
+
+    bindStaffField('#id_bat_Encoder',     '#id_bat_Enc_Lic',  'bat_Enc_Lic');
+    bindStaffField('#id_bat_Checker',     '#id_bat_Chec_Lic', 'bat_Chec_Lic');
+    bindStaffField('#id_bat_Verifier',    '#id_bat_Ver_Lic',  'bat_Ver_Lic');
+    bindStaffField('#id_bat_LabManager',  '#id_bat_Lab_Lic',  'bat_Lab_Lic');
+    bindStaffField('#id_bat_Head',        '#id_bat_Head_Lic', 'bat_Head_Lic');
+  });
 </script>
 {% endblock javascripts %}
