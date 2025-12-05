@@ -170,7 +170,7 @@
                     </a>
                   </th>
 
-                  <th>
+                  <th colspan="4">
                     <i class="fas fa-pills mr-1"></i>Antibiotic Results
                   </th>
 
@@ -253,7 +253,7 @@
                   </td>
 
                   <!-- ANTIBIOTICS COLUMN -->
-                  <td>
+                  <td colspan="4">
                     <div class="antibiotic-results small">
                       {% for antibiotic_entry in isolate.antibiotic_entries.all %}
                           {% if antibiotic_entry.ab_Disk_value %}
@@ -275,7 +275,7 @@
                             </div>
                           {% endif %}
                       {% empty %}
-                        <small class="text-muted"><em>No Site Result</em></small>
+                        <small class="text-muted"><em>No Site Result</em>&nbsp;</small>
                       {% endfor %}
 
                       {% for retest_entry in isolate.antibiotic_entries.all %}

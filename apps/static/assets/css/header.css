@@ -8,9 +8,8 @@
   min-height: 220px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0 40px;
-  padding-bottom: 140px; /* pushes page content down */
   background: linear-gradient(135deg, #0f1423 0%, #1a1f3a 50%, #1a2a4a 100%);
   z-index: 5;
 }
@@ -26,10 +25,25 @@
   z-index: 2;
   flex: 1;
   color: white;
+  margin-top: 40px;
+  margin-bottom: 0;
+  align-items: left;
 }
 
 .header-content h1 {
   font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #00bcd4 0%, #26c6da 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.header-index h1  {
+  font-size: 50px;
   font-weight: 700;
   margin-bottom: 8px;
   background: linear-gradient(135deg, #00bcd4 0%, #26c6da 100%);
@@ -91,7 +105,7 @@
   z-index: 2;
   display: flex;
   gap: 30px;
-  margin-left: 60px;
+  margin-left: auto !important;
 }
 
 .stat-item {

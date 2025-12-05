@@ -496,7 +496,7 @@ class Antibiotic_List(models.Model):
     Disk_Abx=models.BooleanField(default=True)
     Tier = models.CharField(max_length=10, blank=True, default='')
     Test_Method=models.CharField(max_length=100, choices=TestMethodChoices, blank=True, default="")
-    Abx_code=models.CharField(max_length=100, blank=True, default="")
+    Abx_code=models.CharField(max_length=100, blank=True, default="",)
     Whonet_Abx=models.CharField(max_length=100, blank=True, default="", unique=True)
     Antibiotic=models.CharField(max_length=100, blank=True, default="")
     Guidelines=models.CharField(max_length=100, choices=GuidelineChoices, blank=True, default="")

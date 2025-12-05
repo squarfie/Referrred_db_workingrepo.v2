@@ -48,7 +48,15 @@
                       <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
                     </div>
                     {{ form.password }}
+                                          <!-- Toggle icon aligned to the right -->
+                      <div class="input-group-append">
+                        <span class="input-group-text" style="cursor: pointer;">
+                          <i class="fa fa-eye-slash" id="togglePassword"></i>
+                        </span>
+                      </div>
                   </div>
+                  
+
                 </div>
                 <div class="text-center">
                   <button type="submit" class="btn btn-primary my-4">Sign in</button>
@@ -76,4 +84,18 @@
 {% endblock content %}
 
 <!-- Specific JS goes HERE --> 
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script>
+  const passwordField = document.getElementById("id_password");
+  const toggleIcon = document.getElementById("togglePassword");
+
+  toggleIcon.addEventListener("click", () => {
+    const isPassword = passwordField.type === "password";
+    passwordField.type = isPassword ? "text" : "password";
+
+    // Switch icon
+    toggleIcon.classList.toggle("fa-eye");
+    toggleIcon.classList.toggle("fa-eye-slash");
+  });
+</script>
+{% endblock javascripts %}

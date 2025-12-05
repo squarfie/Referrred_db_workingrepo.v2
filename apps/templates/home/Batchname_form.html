@@ -13,7 +13,7 @@
 
 {% block content %}
 <!-- Animated Header -->
-<div class="header-container">
+<div class="header-container" style="z-index: 0;">
   <div class="background-animation-wrapper" aria-hidden="true">
     <!-- Grid Background -->
     <div class="grid-bg"></div>
@@ -45,7 +45,8 @@
   </div>
 
   <!-- Header Content -->
-  <div class="header-content">
+
+  <div class="header-content" >
     <h1 style="color: aliceblue;"><i class="fas fa-database mr-3" style="color: aliceblue;"></i>Batch Form</h1>
     <p>Create new records </p>
     <div class="badge-group">
@@ -62,12 +63,14 @@
 </div>
 
 <!-- Main Content -->
-<div class="container-fluid mt-5">
+<div class="container-fluid">
+  <br>
   <div class="row justify-content-center">
     <div class="col-lg-11 col-md-12">
       <!-- Batch Form Card -->
       <div class="form-card">
-        <div class="card-header">
+        <div class="card-header" style="background: linear-gradient(135deg, #e8f5f7 0%, #d1e8ed 100%);
+                    border-bottom: 2px solid #d1e8ed;">
           <h4 class="mb-0">
             <i class="ni ni-single-02 mr-2"></i>Create New Batch
           </h4>

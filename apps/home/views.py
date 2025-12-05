@@ -1188,23 +1188,24 @@ def search(request):
 # FOR DROPDOWN ITEMS (Site Code)  
 def add_dropdown(request):
     if request.method == "POST":
-        form = SiteCode_Form(request.POST)  
-        if form.is_valid():           
-            form.save()  
+        site_form = SiteCode_Form(request.POST)  
+        if site_form.is_valid():           
+            site_form.save()  
             messages.success(request, 'Added Successfully')
             return redirect('add_dropdown')  # Redirect after successful POST
             
             
         else:
             messages.error(request, 'Error / Adding Unsuccessful')
-            print(form.errors)
+            print(site_form.errors)
     else:
-        form = SiteCode_Form()  # Show an empty form for GET request
+        site_form = SiteCode_Form()  # Show an empty form for GET request
 
     # Fetch clinic data from the database for dropdown options
     site_items = SiteData.objects.all()
     
-    return render(request, 'home/SiteCodeForm.html', {'form': form, 'site_items': site_items, 'upload_form': SiteCode_uploadForm()})
+    return render(request, 'settings/tabs/sitecode_tab.html', {'site_form': site_form, 'site_items': site_items, 'site_upload_form': SiteCode_uploadForm()})
+
 
 @login_required(login_url="/login/")
 def delete_dropdown(request, id):
@@ -1228,11 +1229,11 @@ def site_view(request):
 
 def upload_sitecode(request):
     if request.method == "POST":
-        upload_form = SiteCode_uploadForm(request.POST, request.FILES)
+        site_upload_form = SiteCode_uploadForm(request.POST, request.FILES)
         
-        if upload_form.is_valid():
-            uploaded_file = upload_form.save()
-            file = uploaded_file.File_uploadSite  # Get the uploaded file
+        if site_upload_form.is_valid():
+            site_uploaded_file = site_upload_form.save()
+            file = site_uploaded_file.File_uploadSite  # Get the uploaded file
             
             print("Uploaded file:", file)  # Debugging statement
 
@@ -1276,9 +1277,9 @@ def upload_sitecode(request):
             messages.error(request, "Invalid form submission.")
 
     else:
-        upload_form = SiteCode_uploadForm()
+        site_upload_form = SiteCode_uploadForm()
 
-    return render(request, 'home/SiteCodeForm.html', {'upload_form': upload_form, 'form': SiteCode_Form()})
+    return render(request, 'settings/tabs/sitecode_tab.html', {'site_upload_form': site_upload_form, 'site_form': SiteCode_Form()})
 
 ################## done edited finish  ##########################
 

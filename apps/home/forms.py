@@ -376,6 +376,11 @@ class AntibioticsForm(forms.ModelForm):
      class Meta:
           model = Antibiotic_List
           fields = '__all__'
+          widgets = {
+               'Antibiotitc' :forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex. Amoxicillin'}),
+               'Abx_code' :forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex. AMX'}),
+               'Whonet_Abx':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex. AMX_ND10 if disk or AMX_NM'}), 
+          }
           
      def save(self, commit=True):
         instance = super().save(commit=False)
